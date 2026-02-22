@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ClearPath — Supply Chain Tracker</title>
+  <meta name="description"
+    content="ClearPath blockchain-powered supply chain tracking system built on Hyperledger Fabric" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --border2: #cbd5e1;
+      --text: #1e293b;
+      --muted: #64748b;
+      --light: #94a3b8;
+      --blue: #2563eb;
+      --blue-lt: #eff6ff;
+      --blue-md: #bfdbfe;
+      --green: #16a34a;
+      --green-lt: #f0fdf4;
+      --green-md: #bbf7d0;
+      --red: #dc2626;
+      --red-lt: #fef2f2;
+      --yellow: #d97706;
+      --yellow-lt: #fffbeb;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      height: 68px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    /* SVG logo inline - mimics the ClearPath logo */
+    .logo-svg {
+      width: 140px;
+      height: 44px;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 32px;
+      background: var(--border);
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-blue {
+      background: var(--blue-lt);
+      color: var(--blue);
+      border: 1px solid var(--blue-md);
+    }
+
+    .badge-green {
+      background: var(--green-lt);
+      color: var(--green);
+      border: 1px solid var(--green-md);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    /* ===== NAVIGATION ===== */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      display: flex;
+      gap: 0;
+    }
+
+    .tab {
+      padding: 14px 20px;
+      border: none;
+      border-bottom: 3px solid transparent;
+      background: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      color: var(--text);
+    }
+
+    .tab.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    /* ===== MAIN ===== */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* ===== SECTION ===== */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+      animation: fadeUp 0.25s ease;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ===== FORM ===== */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+
+    input,
+    select {
+      background: var(--white);
+      border: 1.5px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      width: 100%;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--light);
+    }
+
+    /* ===== BUTTON ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: none;
+    }
+
+    .btn-primary:disabled {
+      background: var(--border2);
+      color: var(--light);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-group {
+      margin-top: 20px;
+    }
+
+    /* ===== DIVIDER ===== */
+    .sep {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 22px 0;
+    }
+
+    /* ===== RESULT ===== */
+    .result-wrap {
+      margin-top: 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: none;
+    }
+
+    .result-wrap.show {
+      display: block;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .result-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .result-bar.success {
+      background: var(--green-lt);
+      color: var(--green);
+      border-bottom: 1px solid var(--green-md);
+    }
+
+    .result-bar.error {
+      background: var(--red-lt);
+      color: var(--red);
+      border-bottom: 1px solid #fecaca;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #7dd3fc;
+      padding: 16px 20px;
+      font-size: 12.5px;
+      line-height: 1.8;
+      overflow-x: auto;
+      max-height: 340px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ===== PRODUCT INFO CARD ===== */
+    .product-info {
+      margin-top: 20px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .product-info.show {
+      display: block;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .product-top {
+      background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .product-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .product-id {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: monospace;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-registered {
+      background: var(--blue-lt);
+      color: var(--blue);
+      border: 1px solid var(--blue-md);
+    }
+
+    .status-transit {
+      background: var(--yellow-lt);
+      color: var(--yellow);
+      border: 1px solid #fde68a;
+    }
+
+    .status-delivered {
+      background: var(--green-lt);
+      color: var(--green);
+      border: 1px solid var(--green-md);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .meta-cell {
+      padding: 16px 20px;
+      border-right: 1px solid var(--border);
+    }
+
+    .meta-cell:last-child {
+      border-right: none;
+    }
+
+    .meta-cell label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--light);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .meta-cell p {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ===== TIMELINE ===== */
+    .timeline-wrap {
+      padding: 20px 24px;
+    }
+
+    .tl-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .tl-item {
+      position: relative;
+      padding: 0 0 18px 24px;
+    }
+
+    .tl-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .tl-dot {
+      position: absolute;
+      left: -1px;
+      top: 4px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--blue);
+      border: 3px solid var(--white);
+      box-shadow: 0 0 0 2px var(--blue-md);
+    }
+
+    .tl-item:last-child .tl-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 2px var(--green-md);
+    }
+
+    .tl-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    .tl-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tl-route {
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .tl-time {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .tl-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: var(--light);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+    }
+
+    /* ===== VERIFY RESULT ===== */
+    .verify-card {
+      margin-top: 20px;
+      border-radius: var(--radius);
+      border: 2px solid;
+      padding: 40px 32px;
+      text-align: center;
+      display: none;
+    }
+
+    .verify-card.show {
+      display: block;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .verify-card.authentic {
+      background: var(--green-lt);
+      border-color: #86efac;
+    }
+
+    .verify-card.notfound {
+      background: var(--red-lt);
+      border-color: #fca5a5;
+    }
+
+    .verify-icon {
+      font-size: 52px;
+      margin-bottom: 14px;
+      line-height: 1;
+    }
+
+    .verify-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .verify-sub {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* ===== SPINNER ===== */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      header {
+        padding: 0 16px;
+      }
+
+      nav {
+        padding: 0 16px;
+      }
+
+      main {
+        padding: 20px 12px 48px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <!-- ClearPath Real Logo (embedded base64) -->
+    <img src="logo.png" alt="ClearPath Logo" style="height:44px;width:auto;" />
+
+    <div class="header-divider"></div>
+    <span class="header-subtitle">Supply Chain Tracker</span>
+
+    <div class="header-right">
+      <span class="badge badge-blue">Hyperledger Fabric</span>
+      <span class="badge badge-green"><span class="dot"></span> Live Network</span>
+    </div>
+  </header>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav>
+    <button class="tab active" onclick="switchTab('trace', this)">🔍 Trace Product</button>
+    <button class="tab" onclick="switchTab('verify', this)">✅ Verify Authenticity</button>
+    <button class="tab" onclick="switchTab('register', this)">📦 Register Product</button>
+    <button class="tab" onclick="switchTab('transfer', this)">🚚 Record Transfer</button>
+  </nav>
+
+  <!-- ===== MAIN ===== -->
+  <main>
+
+    <!-- TRACE TAB -->
+    <div class="section active" id="sec-trace">
+      <div class="section-header">
+        <div class="section-title">Trace Product Journey</div>
+        <div class="section-desc">Enter a Batch ID to view the complete immutable history recorded on the blockchain.
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid-2">
+          <div class="field">
+            <label for="trace_id">Batch ID</label>
+            <input id="trace_id" placeholder="e.g. BATCH001" onkeydown="if(event.key==='Enter') doTrace()" />
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-trace" onclick="doTrace()">🔍 Trace Product</button>
+        </div>
+      </div>
+
+      <!-- Product Info output -->
+      <div class="product-info" id="trace-output">
+        <div class="product-top">
+          <div>
+            <div class="product-name" id="t-name">—</div>
+            <div class="product-id" id="t-id">—</div>
+          </div>
+          <div id="t-status-pill"></div>
+        </div>
+        <div class="meta-grid">
+          <div class="meta-cell"><label>Manufacturer</label>
+            <p id="t-mfr">—</p>
+          </div>
+          <div class="meta-cell"><label>Production Date</label>
+            <p id="t-date">—</p>
+          </div>
+          <div class="meta-cell"><label>Current Owner</label>
+            <p id="t-owner">—</p>
+          </div>
+          <div class="meta-cell"><label>Transactions</label>
+            <p id="t-txcount">—</p>
+          </div>
+        </div>
+        <div class="timeline-wrap">
+          <div class="tl-title">Transfer History</div>
+          <div class="timeline" id="t-timeline"></div>
+        </div>
+      </div>
+
+      <!-- Error output -->
+      <div class="result-wrap" id="trace-error">
+        <div class="result-bar error" id="trace-error-bar">❌ Error</div>
+        <pre id="trace-error-pre"></pre>
+      </div>
+    </div>
+
+    <!-- VERIFY TAB -->
+    <div class="section" id="sec-verify">
+      <div class="section-header">
+        <div class="section-title">Verify Product Authenticity</div>
+        <div class="section-desc">Check if a product is registered and authentic on the blockchain ledger.</div>
+      </div>
+      <div class="card">
+        <div class="grid-2">
+          <div class="field">
+            <label for="verify_id">Batch ID</label>
+            <input id="verify_id" placeholder="e.g. BATCH001" onkeydown="if(event.key==='Enter') doVerify()" />
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-verify" onclick="doVerify()">✅ Verify Now</button>
+        </div>
+      </div>
+      <div class="verify-card" id="verify-output">
+        <div class="verify-icon" id="v-icon">🛡️</div>
+        <div class="verify-title" id="v-title">—</div>
+        <div class="verify-sub" id="v-sub">—</div>
+      </div>
+    </div>
+
+    <!-- REGISTER TAB -->
+    <div class="section" id="sec-register">
+      <div class="section-header">
+        <div class="section-title">Register New Product</div>
+        <div class="section-desc">Record a new product on the blockchain. Each Batch ID must be unique.</div>
+      </div>
+      <div class="card">
+        <div class="grid-2">
+          <div class="field">
+            <label for="r_batch">Batch ID *</label>
+            <input id="r_batch" placeholder="e.g. BATCH-MILK-001" />
+          </div>
+          <div class="field">
+            <label for="r_name">Product Name *</label>
+            <input id="r_name" placeholder="e.g. Fresh Milk 1L" />
+          </div>
+          <div class="field">
+            <label for="r_manu">Manufacturer *</label>
+            <input id="r_manu" placeholder="e.g. Almarai, Nadec, PharmaCo" />
+          </div>
+          <div class="field">
+            <label for="r_date">Production Date *</label>
+            <input id="r_date" type="date" />
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-register" onclick="doRegister()">📦 Register Product</button>
+        </div>
+      </div>
+      <div class="result-wrap" id="register-output">
+        <div class="result-bar" id="register-bar"></div>
+        <pre id="register-pre"></pre>
+      </div>
+    </div>
+
+    <!-- TRANSFER TAB -->
+    <div class="section" id="sec-transfer">
+      <div class="section-header">
+        <div class="section-title">Record Ownership Transfer</div>
+        <div class="section-desc">Log a transfer event between supply chain parties. All data is permanently recorded on
+          the ledger.</div>
+      </div>
+      <div class="card">
+        <div class="grid-2">
+          <div class="field">
+            <label for="t_batch">Batch ID *</label>
+            <input id="t_batch" placeholder="e.g. BATCH001" />
+          </div>
+          <div class="field">
+            <label for="t_owner">New Owner *</label>
+            <input id="t_owner" placeholder="e.g. Distributor_Riyadh_01" />
+          </div>
+          <div class="field">
+            <label for="t_loc">Location *</label>
+            <input id="t_loc" placeholder="e.g. Riyadh, Jeddah, Dammam" />
+          </div>
+          <div class="field">
+            <label for="t_temp">Temperature (°C)</label>
+            <input id="t_temp" placeholder="e.g. 4, 25, -18" />
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-transfer" onclick="doTransfer()">🚚 Record Transfer</button>
+        </div>
+      </div>
+      <div class="result-wrap" id="transfer-output">
+        <div class="result-bar" id="transfer-bar"></div>
+        <pre id="transfer-pre"></pre>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const API = "http://localhost:3001";
+
+    /* ---- Tab switching ---- */
+    function switchTab(name, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('sec-' + name).classList.add('active');
+    }
+
+    /* ---- Loading ---- */
+    function setLoading(id, on) {
+      const b = document.getElementById(id);
+      if (on) { b._txt = b.innerHTML; b.innerHTML = '<div class="spinner"></div> Loading...'; b.disabled = true; }
+      else { b.innerHTML = b._txt; b.disabled = false; }
+    }
+
+    /* ---- Generic result box ---- */
+    function showBox(wrapId, barId, preId, data, ok) {
+      const wrap = document.getElementById(wrapId);
+      const bar = document.getElementById(barId);
+      const pre = document.getElementById(preId);
+      wrap.className = 'result-wrap show';
+      bar.className = 'result-bar ' + (ok ? 'success' : 'error');
+      bar.textContent = ok ? '✅ Success' : '❌ Error';
+      pre.textContent = JSON.stringify(data, null, 2);
+    }
+
+    /* ---- TRACE ---- */
+    async function doTrace() {
+      const id = document.getElementById('trace_id').value.trim();
+      if (!id) return alert('Please enter a Batch ID.');
+      setLoading('btn-trace', true);
+
+      // hide previous outputs
+      document.getElementById('trace-output').className = 'product-info';
+      document.getElementById('trace-error').className = 'result-wrap';
+
+      try {
+        const r = await fetch(`${API}/api/trace/${encodeURIComponent(id)}`);
+        const d = await r.json();
+
+        if (d.error) {
+          document.getElementById('trace-error').className = 'result-wrap show';
+          document.getElementById('trace-error-bar').textContent = '❌ ' + d.error;
+          document.getElementById('trace-error-pre').textContent = JSON.stringify(d, null, 2);
+        } else {
+          renderProduct(d);
+        }
+      } catch (e) {
+        document.getElementById('trace-error').className = 'result-wrap show';
+        document.getElementById('trace-error-bar').textContent = '❌ Cannot connect to API';
+        document.getElementById('trace-error-pre').textContent = e.message;
+      }
+      setLoading('btn-trace', false);
+    }
+
+    function renderProduct(d) {
+      document.getElementById('t-name').textContent = d.productName;
+      document.getElementById('t-id').textContent = 'Batch ID: ' + d.batchID;
+      document.getElementById('t-mfr').textContent = d.manufacturer;
+      document.getElementById('t-date').textContent = d.productionDate;
+      document.getElementById('t-owner').textContent = d.currentOwner;
+      document.getElementById('t-txcount').textContent = (d.transactions?.length || 0) + ' events';
+
+      const statusMap = {
+        'Registered': ['status-registered', 'Registered'],
+        'In Transit': ['status-transit', 'In Transit'],
+        'Delivered': ['status-delivered', 'Delivered'],
+      };
+      const [cls, label] = statusMap[d.status] || ['status-registered', d.status];
+      document.getElementById('t-status-pill').innerHTML =
+        `<span class="status-pill ${cls}"><span class="dot"></span> ${label}</span>`;
+
+      // Timeline
+      const tl = document.getElementById('t-timeline');
+      if (!d.transactions || d.transactions.length === 0) {
+        tl.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No transfers recorded yet.</p></div>';
+      } else {
+        tl.innerHTML = d.transactions.map((tx, i) => {
+          const dt = new Date(tx.timestamp);
+          const str = dt.toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          return `
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            <div class="tl-header">
+              <span class="tl-route"><strong>${tx.from}</strong> → <strong>${tx.to}</strong></span>
+              <span class="tl-time">🕐 ${str}</span>
+            </div>
+            <div class="tl-chips">
+              <span class="chip">📍 ${tx.location}</span>
+              <span class="chip">🌡️ ${tx.temperature}°C</span>
+            </div>
+          </div>
+        </div>`;
+        }).join('');
+      }
+
+      document.getElementById('trace-output').className = 'product-info show';
+    }
+
+    /* ---- VERIFY ---- */
+    async function doVerify() {
+      const id = document.getElementById('verify_id').value.trim();
+      if (!id) return alert('Please enter a Batch ID.');
+      setLoading('btn-verify', true);
+
+      const card = document.getElementById('verify-output');
+      card.className = 'verify-card';
+
+      try {
+        const r = await fetch(`${API}/api/verify/${encodeURIComponent(id)}`);
+        const d = await r.json();
+        const ok = d.message && d.message.includes('AUTHENTIC');
+        card.className = 'verify-card show ' + (ok ? 'authentic' : 'notfound');
+        document.getElementById('v-icon').textContent = ok ? '🛡️' : '⚠️';
+        document.getElementById('v-title').textContent = ok ? 'Authentic Product' : 'Product Not Found';
+        document.getElementById('v-title').style.color = ok ? 'var(--green)' : 'var(--red)';
+        document.getElementById('v-sub').textContent = d.message || 'Unknown result.';
+      } catch (e) {
+        card.className = 'verify-card show notfound';
+        document.getElementById('v-icon').textContent = '❌';
+        document.getElementById('v-title').textContent = 'Connection Error';
+        document.getElementById('v-title').style.color = 'var(--red)';
+        document.getElementById('v-sub').textContent = e.message;
+      }
+      setLoading('btn-verify', false);
+    }
+
+    /* ---- REGISTER ---- */
+    async function doRegister() {
+      const body = {
+        batchID: document.getElementById('r_batch').value.trim(),
+        productName: document.getElementById('r_name').value.trim(),
+        manufacturer: document.getElementById('r_manu').value.trim(),
+        productionDate: document.getElementById('r_date').value.trim(),
+      };
+      if (!body.batchID || !body.productName || !body.manufacturer || !body.productionDate)
+        return alert('Please fill in all required fields.');
+
+      setLoading('btn-register', true);
+      try {
+        const r = await fetch(`${API}/api/register`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        });
+        const d = await r.json();
+        showBox('register-output', 'register-bar', 'register-pre', d, !d.error);
+      } catch (e) {
+        showBox('register-output', 'register-bar', 'register-pre', { error: e.message }, false);
+      }
+      setLoading('btn-register', false);
+    }
+
+    /* ---- TRANSFER ---- */
+    async function doTransfer() {
+      const body = {
+        batchID: document.getElementById('t_batch').value.trim(),
+        newOwner: document.getElementById('t_owner').value.trim(),
+        location: document.getElementById('t_loc').value.trim(),
+        temperature: document.getElementById('t_temp').value.trim(),
+      };
+      if (!body.batchID || !body.newOwner || !body.location)
+        return alert('Please fill in all required fields.');
+
+      setLoading('btn-transfer', true);
+      try {
+        const r = await fetch(`${API}/api/tx`, {   /* ✅ correct endpoint */
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        });
+        const d = await r.json();
+        showBox('transfer-output', 'transfer-bar', 'transfer-pre', d, !d.error);
+      } catch (e) {
+        showBox('transfer-output', 'transfer-bar', 'transfer-pre', { error: e.message }, false);
+      }
+      setLoading('btn-transfer', false);
+    }
+  </script>
+</body>
+
+</html>

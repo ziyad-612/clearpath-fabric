@@ -29,35 +29,38 @@ class ClearPathContract extends Contract {
     }
 
     async RecordTransaction(ctx, batchID, newOwner, location, temperature) {
-    const productBytes = await ctx.stub.getState(batchID);
-    if (!productBytes || productBytes.length === 0) {
-        throw new Error(`Product ${batchID} does not exist`);
+        const productString = await ctx.stub.getState(batchID);
+        if (!productString || productString.length === 0) {
+            throw new Error(`Product ${batchID} does not exist`);
+        }
+
+        const product = JSON.parse(productString.toString());
+
+        // ✅ deterministic timestamp from Fabric (prevents ProposalResponsePayloads mismatch)
+        const ts = ctx.stub.getTxTimestamp();
+        const seconds = typeof ts.seconds === 'object' && ts.seconds !== null
+            ? ts.seconds.toNumber()
+            : Number(ts.seconds);
+        const nanos = ts.nanos || 0;
+        const millis = (seconds * 1000) + Math.floor(Number(nanos) / 1e6);
+        const txTime = new Date(millis).toISOString();
+
+        const transaction = {
+            from: product.currentOwner,
+            to: newOwner,
+            location,
+            temperature,
+            timestamp: txTime
+        };
+
+        product.currentOwner = newOwner;
+        product.status = 'In Transit';
+        product.transactions.push(transaction);
+
+        await ctx.stub.putState(batchID, Buffer.from(JSON.stringify(product)));
+        return JSON.stringify(transaction);
     }
 
-    const product = JSON.parse(productBytes.toString());
-
-    // ✅ Deterministic timestamp across endorsing peers
-    const ts = ctx.stub.getTxTimestamp(); // protobuf Timestamp
-    const txTimestamp = {
-        seconds: ts.seconds.toString(),  // store as string to avoid Long issues
-        nanos: ts.nanos
-    };
-
-    const transaction = {
-        from: product.currentOwner,
-        to: newOwner,
-        location,
-        temperature,
-        timestamp: txTimestamp
-    };
-
-    product.currentOwner = newOwner;
-    product.status = 'In Transit';
-    product.transactions.push(transaction);
-
-    await ctx.stub.putState(batchID, Buffer.from(JSON.stringify(product)));
-    return JSON.stringify(transaction);
-}
 
 
     async TraceProduct(ctx, batchID) {
