@@ -36,7 +36,6 @@ class ClearPathContract extends Contract {
 
         const product = JSON.parse(productString.toString());
 
-        // ✅ deterministic timestamp from Fabric (prevents ProposalResponsePayloads mismatch)
         const ts = ctx.stub.getTxTimestamp();
         const seconds = typeof ts.seconds === 'object' && ts.seconds !== null
             ? ts.seconds.toNumber()
@@ -60,8 +59,6 @@ class ClearPathContract extends Contract {
         await ctx.stub.putState(batchID, Buffer.from(JSON.stringify(product)));
         return JSON.stringify(transaction);
     }
-
-
 
     async TraceProduct(ctx, batchID) {
         const productBytes = await ctx.stub.getState(batchID);

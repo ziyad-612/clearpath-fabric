@@ -11,10 +11,8 @@ const { connect, signers } = require('@hyperledger/fabric-gateway');
 const channelName = 'mychannel';
 const chaincodeName = 'clearpath';
 
-// مسارات شهادات Org1 Admin (من test-network)
 const cryptoPath = path.resolve(__dirname, '../../test-network/organizations/peerOrganizations/org1.example.com');
 
-// ملاحظة: اسم ملف الشهادة قد يختلف حسب الإصدار
 function findCertPath() {
   const signcertsDir = path.join(
     cryptoPath,
@@ -26,7 +24,6 @@ function findCertPath() {
   return path.join(signcertsDir, certFile);
 }
 
-// ملاحظة: اسم ملف المفتاح يتغير (زي اللي عندك *_sk)
 function findPrivateKeyPath() {
   const keystoreDir = path.join(
     cryptoPath,
@@ -68,7 +65,6 @@ function newSigner() {
   const privateKeyPem = fs.readFileSync(keyPath);
   const privateKey = crypto.createPrivateKey(privateKeyPem);
 
-  // ✅ هذا الاسم الصحيح مع fabric-gateway 1.x
   return signers.newPrivateKeySigner(privateKey);
 }
 
