@@ -41,7 +41,7 @@ const tlsCertPath = path.join(
   'peers/peer0.org1.example.com/tls/ca.crt'
 );
 
-const peerEndpoint = 'localhost:7051';
+const peerEndpoint = '127.0.0.1:7051';
 const peerHostAlias = 'peer0.org1.example.com';
 
 function newGrpcConnection() {

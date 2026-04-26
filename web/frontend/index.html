@@ -141,42 +141,44 @@
     nav {
       background: var(--white);
       border-bottom: 1px solid var(--border);
-      padding: 0 40px;
+      padding: 14px 40px;
       display: flex;
-      gap: 0;
+      gap: 12px;
+      overflow-x: auto;
     }
 
     .tab {
-      padding: 14px 20px;
+      padding: 12px 20px;
       border: none;
-      border-bottom: 3px solid transparent;
-      background: none;
+      border-radius: 12px;
+      background: transparent;
       cursor: pointer;
       font-family: inherit;
-      font-size: 13.5px;
-      font-weight: 500;
-      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748b;
       display: flex;
       align-items: center;
-      gap: 7px;
-      transition: all 0.15s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: nowrap;
     }
 
     .tab:hover {
-      color: var(--text);
+      color: #0f172a;
+      background: #f1f5f9;
     }
 
     .tab.active {
-      color: var(--blue);
-      border-bottom-color: var(--blue);
+      color: #fff;
+      background: #2563eb;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
     }
 
     /* ===== MAIN ===== */
     main {
       max-width: 900px;
       margin: 0 auto;
-      padding: 32px 24px 60px;
+      padding: 40px 24px 60px;
     }
 
     /* ===== SECTION ===== */
@@ -186,13 +188,13 @@
 
     .section.active {
       display: block;
-      animation: fadeUp 0.25s ease;
+      animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes fadeUp {
       from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(15px);
       }
 
       to {
@@ -202,68 +204,85 @@
     }
 
     .section-header {
-      margin-bottom: 24px;
+      margin-bottom: 30px;
     }
 
     .section-title {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 24px;
+      font-weight: 800;
       color: var(--text);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
     }
 
     .section-desc {
       color: var(--muted);
-      font-size: 13.5px;
+      font-size: 14.5px;
     }
 
     /* ===== CARD ===== */
     .card {
       background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
-      box-shadow: var(--shadow);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
     }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--blue), var(--blue-lt));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .card:hover::before { opacity: 1; }
 
     /* ===== FORM ===== */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 24px;
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
     label {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: 0.01em;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
-    input,
-    select {
-      background: var(--white);
-      border: 1.5px solid var(--border2);
-      border-radius: 8px;
-      padding: 10px 14px;
+    input, select {
+      background: #f8fafc;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 14px 18px;
       color: var(--text);
       font-family: inherit;
-      font-size: 14px;
-      transition: border-color 0.15s, box-shadow 0.15s;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       outline: none;
       width: 100%;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
     }
 
-    input:focus,
-    select:focus {
+    input:focus, select:focus {
+      background: #ffffff;
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      box-shadow: 0 4px 20px rgba(37, 99, 235, 0.12);
+      transform: translateY(-1px);
     }
 
     input::placeholder {
@@ -273,32 +292,44 @@
     /* ===== BUTTON ===== */
     .btn {
       display: inline-flex;
+      justify-content: center;
       align-items: center;
-      gap: 7px;
-      padding: 10px 22px;
-      border-radius: 8px;
-      border: none;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #0f172a;
       cursor: pointer;
       font-family: inherit;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
-      transition: all 0.15s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn:hover {
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
     .btn-primary {
-      background: var(--blue);
-      color: #fff;
-      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.3);
+      background: linear-gradient(135deg, var(--blue), #1e3a8a);
+      border: none;
+      color: #ffffff;
+      box-shadow: 0 6px 20px -4px rgba(37, 99, 235, 0.4);
+      letter-spacing: 0.02em;
     }
 
     .btn-primary:hover {
-      background: #1d4ed8;
-      box-shadow: var(--shadow-md);
-      transform: translateY(-1px);
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 8px 25px -4px rgba(37, 99, 235, 0.5);
+      transform: translateY(-2px);
     }
 
     .btn-primary:active {
-      transform: none;
+      transform: scale(0.98);
     }
 
     .btn-primary:disabled {
@@ -431,6 +462,12 @@
       background: var(--green-lt);
       color: var(--green);
       border: 1px solid var(--green-md);
+    }
+
+    .status-alert {
+      background: var(--red-lt);
+      color: var(--red);
+      border: 1px solid #fecaca;
     }
 
     .meta-grid {
@@ -637,63 +674,668 @@
     }
 
     /* ===== RESPONSIVE ===== */
+    /* ===== MOBILE RESPONSIVE ===== */
     @media (max-width: 640px) {
+
+      /* Header */
       header {
-        padding: 0 16px;
+        padding: 0 12px;
+        height: 56px;
+        gap: 10px;
       }
 
+      header img {
+        height: 32px !important;
+      }
+
+      .header-divider {
+        display: none;
+      }
+
+      .header-subtitle {
+        display: none;
+      }
+
+      .header-right {
+        gap: 6px;
+      }
+
+      .header-right .badge {
+        display: none;
+      }
+
+      #user-pill {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Navigation - horizontal scroll */
       nav {
-        padding: 0 16px;
+        padding: 0 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
       }
 
+      nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab {
+        padding: 10px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      /* Main */
       main {
-        padding: 20px 12px 48px;
+        padding: 14px 10px 80px;
       }
 
+      /* Cards */
       .card {
-        padding: 20px;
+        padding: 14px;
+        border-radius: 10px;
+        overflow-x: auto;
       }
 
+      /* Grids */
       .grid-2 {
         grid-template-columns: 1fr;
+        gap: 12px;
       }
 
       .meta-grid {
         grid-template-columns: 1fr 1fr;
       }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      /* Buttons */
+      .btn-group .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Stats */
+      .stat-num {
+        font-size: 24px;
+      }
+
+      .stat-card {
+        padding: 14px;
+      }
+
+      /* Section */
+      .section-title {
+        font-size: 17px;
+      }
+
+      /* Product card */
+      .product-top {
+        padding: 12px 14px;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      /* Timeline */
+      .timeline-wrap {
+        padding: 12px 14px;
+      }
+
+      /* Verify */
+      .verify-card {
+        padding: 24px 14px;
+      }
+
+      .verify-icon {
+        font-size: 40px;
+      }
+
+      .verify-title {
+        font-size: 18px;
+      }
+
+      /* Notification panel */
+      #notif-panel {
+        width: calc(100vw - 20px);
+        right: 4px;
+        left: 4px;
+      }
+
+      /* Tables */
+      table {
+        min-width: 480px;
+        font-size: 12px;
+      }
+
+      th,
+      td {
+        padding: 8px 6px;
+        font-size: 12px;
+      }
+
+      /* Auth card */
+      .auth-card {
+        padding: 22px 16px;
+        margin: 12px;
+        border-radius: 14px;
+        max-width: calc(100vw - 24px);
+      }
+
+      /* Pre/code */
+      pre {
+        font-size: 11px;
+        padding: 10px 12px;
+      }
+
+      /* Section header */
+      .section-header {
+        margin-bottom: 16px;
+      }
     }
+
+    /* Extra small */
+    @media (max-width: 380px) {
+      .tab {
+        padding: 10px 10px;
+        font-size: 11px;
+      }
+
+      .card {
+        padding: 12px;
+      }
+
+      .stat-num {
+        font-size: 20px;
+      }
+    }
+
+    .badge-red {
+      background: var(--red-lt);
+      color: var(--red);
+      border: 1px solid #fecaca
+    }
+
+    .badge-yellow {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
+    .btn-sm {
+      padding: 5px 12px;
+      font-size: 12px
+    }
+
+    .btn-warn {
+      background: var(--yellow);
+      color: #fff;
+      box-shadow: 0 1px 2px rgba(217, 119, 6, .3)
+    }
+
+    .btn-warn:hover {
+      background: #b45309
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow)
+    }
+
+    .stat-num {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--blue)
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em
+    }
+
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(6px)
+    }
+
+    .auth-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, .35)
+    }
+
+    .auth-tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: none;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      transition: all .15s
+    }
+
+    .auth-tab-btn.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue)
+    }
+
+    #notif-panel {
+      display: none;
+      position: absolute;
+      top: 68px;
+      right: 16px;
+      width: 360px;
+      max-height: 420px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      z-index: 500
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--bg);
+    }
+    
+    th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+    tbody tr { transition: background 0.2s; }
+    tbody tr:hover {
+      background: var(--blue-lt);
+    }
+
+/* ===== LANDING PAGE DESIGN (Custom Colors - Not Green) ===== */
+#landing-page { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg); font-family: 'Inter', sans-serif; }
+.lp-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 60px; background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+.lp-logo { color: var(--text); font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.lp-nav { display: flex; gap: 32px; font-weight: 600; color: var(--muted); }
+.lp-nav a { text-decoration: none; color: inherit; transition: color 0.15s; }
+.lp-nav a:hover { color: var(--blue); }
+.lp-hero { display: flex; padding: 80px 60px; align-items: center; gap: 60px; background: var(--white); border-bottom: 1px solid var(--border); }
+.lp-hero-text { flex: 1.1; }
+.lp-hero-text h1 { font-size: 52px; line-height: 1.15; margin-bottom: 24px; color: var(--text); font-weight: 800; letter-spacing: -0.02em; }
+.lp-hero-text p { font-size: 18px; color: var(--muted); margin-bottom: 40px; line-height: 1.6; }
+.lp-hero-img { flex: 1; border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-lg); }
+.lp-hero-img img { width: 100%; height: auto; display: block; object-fit: cover; }
+.lp-btn { display: inline-flex; justify-content: center; align-items: center; padding: 12px 28px; border-radius: 30px; font-weight: 600; font-size: 15px; cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap; }
+.lp-btn-primary { background: var(--blue); color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.25); }
+.lp-btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.3); }
+.lp-btn-outline { background: transparent; border: 2px solid var(--blue); color: var(--blue); }
+.lp-btn-outline:hover { background: var(--blue-lt); }
+.lp-features { background: var(--bg); padding: 80px 60px; text-align: center; }
+.lp-features h2 { font-size: 36px; margin-bottom: 12px; font-weight: 800; color: var(--text); letter-spacing: -0.02em;}
+.lp-features p { color: var(--muted); font-size: 18px; margin-bottom: 50px; }
+.lp-feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+.lp-feat-card { background: var(--white); padding: 36px 32px; border-radius: 20px; box-shadow: var(--shadow-md); transition: transform 0.2s; text-align: left;}
+.lp-feat-card:hover { transform: translateY(-5px); }
+.lp-feat-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px;}
+.lp-feat-desc { font-size: 14.5px; color: var(--muted); line-height: 1.5; }
+.lp-footer { background: #0f172a; color: #94a3b8; padding: 80px 60px; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 50px; }
+.lp-footer h4 { color: #fff; margin-bottom: 24px; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+.lp-footer ul { list-style: none; padding: 0; }
+.lp-footer ul li { margin-bottom: 14px; }
+.lp-footer a { color: inherit; text-decoration: none; font-size: 14.5px; transition: color 0.15s;}
+.lp-footer a:hover { color: #fff; }
+@media (max-width: 900px) {
+  .lp-hero { flex-direction: column; padding: 40px 24px; text-align: center; gap: 30px; }
+  .lp-header { padding: 16px 24px; flex-wrap: wrap; justify-content: center; gap: 15px; height: auto; }
+  .lp-nav { order: 10; width: 100%; display: flex !important; justify-content: center; gap: 15px; font-size: 13px; }
+  .lp-hero-text h1 { font-size: 32px; margin-bottom: 16px; }
+  .lp-hero-text p { font-size: 16px; margin-bottom: 30px; }
+  .lp-features { padding: 60px 24px; }
+  .lp-features h2 { font-size: 28px; }
+  .lp-feat-grid { gap: 20px; }
+  .lp-footer { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
+  
+  /* Dashboard adjustments */
+  .dashboard-header { flex-direction: column; height: auto !important; padding: 15px !important; gap: 15px; }
+  .dashboard-header .lp-logo { margin-bottom: 0; }
+  nav { padding: 10px 15px; } /* Dashboard tab bar */
+}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" id="qrcode-fallback"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 
 <body>
 
-  <!-- ===== HEADER ===== -->
-  <header>
-    <!-- ClearPath Real Logo (embedded base64) -->
-    <img src="logo.png" alt="ClearPath Logo" style="height:44px;width:auto;" />
+  <!-- ===== LANDING PAGE ===== -->
+  <div id="landing-page" style="display:none;">
+    <header class="lp-header">
+      <a href="#" class="lp-logo">
+        <img src="logo.png" alt="ClearPath" style="height:38px;">
+        ClearPath
+      </a>
+      <div class="lp-nav">
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#how">How it Works</a>
+        <a href="#network">Network Nodes</a>
+        <a href="#" id="lp-nav-dashboard" style="display:none;" onclick="goToDashboard(); return false;">Dashboard</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <button class="lp-btn" id="top-login-btn" style="background:transparent;color:var(--text);border:none;padding:10px 16px;" onclick="showAuthModal('login')">Log In</button>
+        <button class="lp-btn lp-btn-primary" id="top-signup-btn" onclick="showAuthModal('register')">Sign Up</button>
+      </div>
+    </header>
+    
+    <div class="lp-hero" id="home">
+      <div class="lp-hero-text">
+        <h1>Discover immutable supply chain tracing with AI.</h1>
+        <p>Support your trusted local economy, enabled by hyper-secure Hyperledger Fabric blockchain technology. Track provenance from source to shelf.</p>
+        <div style="display:flex;gap:16px;">
+          <button class="lp-btn lp-btn-primary" onclick="goToTrace()">Trace Your Supply</button>
+          <button class="lp-btn lp-btn-outline" onclick="goToVerify()">Verify Product QR</button>
+        </div>
+      </div>
+      <div class="lp-hero-img">
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); width: 100%; aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; padding: 40px; box-sizing: border-box;">
+           <div style="font-size: 64px; margin-bottom: 20px; background: rgba(255,255,255,0.1); width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">📦</div>
+           <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Real-Time Global Ledger</div>
+           <div style="font-size: 15px; opacity: 0.7; margin-top: 10px;">Blockchain Data Verification Engine</div>
+        </div>
+      </div>
+    </div>
 
-    <div class="header-divider"></div>
-    <span class="header-subtitle">Supply Chain Tracker</span>
+    <!-- Features Section -->
+    <div class="lp-features" id="features" style="background:#f8fafc;">
+      <h2>Core Platform Features</h2>
+      <p>A suite of powerful tools designed for modern supply chains.</p>
+      <div class="lp-feat-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+         <div class="lp-feat-card" style="background:#ffffff; border:1px solid #e2e8f0; box-shadow: none; transition: transform 0.2s; cursor:default;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:16px;">🛑</div>
+            <div class="lp-feat-title">Anti-Counterfeit</div>
+            <div class="lp-feat-desc">Ensure every product is backed by cryptographic proofs. Eliminate fake goods from the market instantly.</div>
+         </div>
+         <div class="lp-feat-card" style="background:#ffffff; border:1px solid #e2e8f0; box-shadow: none; transition: transform 0.2s; cursor:default;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:16px;">📡</div>
+            <div class="lp-feat-title">Live IoT Integration</div>
+            <div class="lp-feat-desc">Link sensors directly to smart contracts. Define precise acceptable limits for temperature and humidity per product batch for strict quality control.</div>
+         </div>
+         <div class="lp-feat-card" style="background:#ffffff; border:1px solid #e2e8f0; box-shadow: none; transition: transform 0.2s; cursor:default;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:16px;">📊</div>
+            <div class="lp-feat-title">Immutable Auditing</div>
+            <div class="lp-feat-desc">Generate one-click reports for regulatory compliance. Every transaction is permanently etched into the ledger.</div>
+         </div>
+         <div class="lp-feat-card" style="background:#ffffff; border:1px solid #e2e8f0; box-shadow: none; transition: transform 0.2s; cursor:default;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:32px;margin-bottom:16px;">⚡</div>
+            <div class="lp-feat-title">High-Speed Processing</div>
+            <div class="lp-feat-desc">Powered by Hyperledger Fabric, handling thousands of consensus-driven transactions securely per second.</div>
+         </div>
+      </div>
+    </div>
 
-    <div class="header-right">
-      <span class="badge badge-blue">Hyperledger Fabric</span>
-      <span class="badge badge-green"><span class="dot"></span> Live Network</span>
+    <!-- How It Works Section -->
+    <div class="lp-features" id="how" style="padding-top:60px;">
+      <h2>How ClearPath Works</h2>
+      <p>Seamlessly integrated workflows from the source to the final consumer.</p>
+      
+      <div style="display:flex;flex-direction:row;justify-content:center;align-items:center;margin-top:50px;gap:20px;flex-wrap:wrap;max-width:1000px;margin-left:auto;margin-right:auto;">
+         <div style="flex:1;min-width:260px;text-align:center;padding:32px 24px;border-radius:16px;background:var(--blue-lt);border:2px dashed var(--blue);">
+            <div style="font-size:48px;margin-bottom:16px;">🏭</div>
+            <h3 style="font-size:20px;color:var(--blue);margin-bottom:12px;">1. Manufacturer</h3>
+            <p style="font-size:15px;color:var(--text);line-height:1.6;">Creates the initial digital twin of the product batch on the blockchain.</p>
+         </div>
+         <div style="font-size:30px;color:var(--muted);font-weight:bold;">➔</div>
+         <div style="flex:1;min-width:260px;text-align:center;padding:32px 24px;border-radius:16px;background:var(--green-lt);border:2px dashed var(--green);">
+            <div style="font-size:48px;margin-bottom:16px;">🚚</div>
+            <h3 style="font-size:20px;color:var(--green);margin-bottom:12px;">2. Logistics HUB</h3>
+            <p style="font-size:15px;color:var(--text);line-height:1.6;">Scans and claims ownership of the batch in transit, appending IoT data.</p>
+         </div>
+         <div style="font-size:30px;color:var(--muted);font-weight:bold;">➔</div>
+         <div style="flex:1;min-width:260px;text-align:center;padding:32px 24px;border-radius:16px;background:#fef3c7;border:2px dashed #f59e0b;">
+            <div style="font-size:48px;margin-bottom:16px;">🏪</div>
+            <h3 style="font-size:20px;color:#d97706;margin-bottom:12px;">3. Retailer</h3>
+            <p style="font-size:15px;color:var(--text);line-height:1.6;">Receives the goods and consumers scan the QR to verify entire history.</p>
+         </div>
+      </div>
+    </div>
+    <div class="lp-features" id="network">
+      <h2>Top Enterprise Nodes</h2>
+      <p>Trusted partners validating the network in real-time</p>
+      <div class="lp-feat-grid">
+         <div class="lp-feat-card">
+            <div class="lp-feat-title">Producer Network</div>
+            <div class="lp-feat-desc">From local farms to large factories, ensuring raw material authenticity right from the source.</div>
+         </div>
+         <div class="lp-feat-card">
+            <div class="lp-feat-title">Smart Logistics</div>
+            <div class="lp-feat-desc">IoT-enabled cold storage monitors temperature and humidity on the blockchain to prevent spoilage.</div>
+         </div>
+         <div class="lp-feat-card">
+            <div class="lp-feat-title">Retail Authenticity</div>
+            <div class="lp-feat-desc">Empowering customers to scan and verify shelf products with absolute cryptographic certainty.</div>
+         </div>
+      </div>
+    </div>
+
+    <footer class="lp-footer">
+      <div>
+         <div class="lp-logo" style="color:#fff;margin-bottom:16px;">
+           <img src="logo.png" alt="ClearPath" style="height:32px;filter:brightness(0) invert(1);">
+           ClearPath
+         </div>
+         <p style="font-size:14px;line-height:1.6;margin-bottom:24px;">Connecting manufacturers, logistics, and retailers for a completely transparent world.</p>
+          <div style="display:flex;gap:12px;">
+             <!-- Social icons -->
+             <span onclick="window.open('https://linkedin.com', '_blank')" style="display:inline-flex;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.1);align-items:center;justify-content:center;color:#fff;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">in</span>
+             <span onclick="window.open('https://twitter.com', '_blank')" style="display:inline-flex;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.1);align-items:center;justify-content:center;color:#fff;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">x</span>
+          </div>
+       </div>
+       <div>
+         <h4>Explore</h4>
+         <ul><li><a href="#home">Home</a></li><li><a href="#network">Network Nodes</a></li><li><a href="#" onclick="goToVerify();return false;">Verify Dashboard</a></li></ul>
+       </div>
+       <div>
+         <h4>Support</h4>
+         <ul><li><a href="#" onclick="alert('Our Help Center is currently being updated. Please check back later!'); return false;">Help Center</a></li><li><a href="#" onclick="alert('API Documentation v2.0 is launching soon!'); return false;">Integration API</a></li><li><a href="#" onclick="alert('Terms of Use are under legal review.'); return false;">Terms of Use</a></li></ul>
+       </div>
+       <div>
+         <h4>Stay Secure</h4>
+         <p style="font-size:13.5px;margin-bottom:16px;">Get updates on new hyperledger core releases.</p>
+         <div style="display:flex;gap:8px;">
+           <input type="email" id="footer-email" placeholder="Your email" style="width:100%;background:rgba(255,255,255,0.05);color:#fff;border:1px solid #334155;border-radius:8px;padding:10px 14px;outline:none;">
+           <button onclick="subscribeNewsletter()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:0 20px;cursor:pointer;font-weight:600;">Join</button>
+         </div>
+       </div>
+    </footer>
+    <div style="padding:20px 60px;background:#020617;color:#64748b;font-size:13px;text-align:center;">
+       &copy; 2026 ClearPath Supply Chain System. All rights reserved.
+    </div>
+  </div>
+
+  <!-- ===== LOGIN OVERLAY (Moved outside) ===== -->
+  <div id="login-overlay">
+    <div class="auth-card" style="position:relative;">
+      <button onclick="document.getElementById('login-overlay').style.display='none'" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:30px;cursor:pointer;color:var(--muted);">&times;</button>
+      <div style="text-align:center;margin-bottom:24px">
+        <img src="logo.png" alt="ClearPath" style="height:44px;margin-bottom:12px"><br>
+        <span style="color:var(--muted);font-size:14px">Blockchain Supply Chain System</span>
+      </div>
+      <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:24px">
+        <button class="auth-tab-btn active" onclick="showAuthTab('login')">Sign In</button>
+        <button class="auth-tab-btn" onclick="showAuthTab('register')">Create Account</button>
+      </div>
+      <!-- Login -->
+      <div id="auth-login">
+        <div class="field" style="margin-bottom:16px"><label>User ID</label><input id="l_userid"
+            placeholder="e.g. admin" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div class="field" style="margin-bottom:16px"><label>Password</label><input id="l_pass" type="password"
+            placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <p id="l_err" style="color:var(--red);font-size:13px;min-height:18px;margin-bottom:12px"></p>
+        <button id="btn-login" class="btn btn-primary" onclick="doLogin()" style="width:100%">Sign In</button>
+
+      </div>
+      <!-- Register -->
+      <div id="auth-register" style="display:none">
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="field"><label>User ID *</label><input id="ru_id" placeholder="john01"></div>
+          <div class="field"><label>Full Name *</label><input id="ru_name" placeholder="John Smith"></div>
+          <div class="field"><label>Email *</label><input id="ru_email" placeholder="john@co.com"></div>
+          <div class="field"><label>Role *</label><select id="ru_role">
+              <option>Manufacturer</option>
+              <option>Logistics</option>
+              <option>Retailer</option>
+              <option>Consumer</option>
+            </select></div>
+        </div>
+        <div class="field" style="margin-bottom:16px"><label>Password *</label><input id="ru_pass" type="password"
+            placeholder="Choose a password"></div>
+        <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 12px; margin-bottom: 16px;">
+            <p style="font-size: 11.5px; color: #92400e; line-height: 1.4; margin: 0;">
+                ⚠️ <strong>Approval Required:</strong> Consumer accounts are active immediately, but all other roles require manual <strong>Admin Approval</strong> before login is permitted.
+            </p>
+        </div>
+        <p id="ru_err" style="color:var(--red);font-size:13px;min-height:18px;margin-bottom:12px"></p>
+        <button id="btn-reg-user" class="btn btn-primary" onclick="doRegisterUser()" style="width:100%">Create
+          Account</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-dashboard" style="display:none; background: var(--bg); min-height: 100vh;">
+
+  <header style="background: #ffffff; color: var(--text); padding: 18px 40px; display: flex; align-items: center; border-bottom: 1px solid var(--border);">
+    <a href="#" onclick="goToLandingPage(); return false;" title="Return to Website" style="display:flex; align-items:center; text-decoration:none;">
+      <img src="logo.png" alt="ClearPath Logo" style="height: 38px; width: auto;" />
+      <span style="margin-left: 10px; font-weight: 800; font-size: 20px; color: var(--text);">ClearPath</span>
+    </a>
+    <div style="width: 1px; height: 24px; background: var(--border); margin: 0 20px;"></div>
+    
+    <div class="lp-nav" style="margin-right: auto; display:flex; gap:20px; font-size:14px;">
+        <a href="#" onclick="goToLandingPage(); return false;">Home</a>
+        <a href="#" onclick="goToLandingPage(); setTimeout(() => location.hash='features', 100); return false;">Features</a>
+        <a href="#" onclick="goToLandingPage(); setTimeout(() => location.hash='how', 100); return false;">How it Works</a>
+        <a href="#" onclick="goToLandingPage(); setTimeout(() => location.hash='network', 100); return false;">Network Nodes</a>
+        <a href="#" onclick="goToDashboard(); return false;">Dashboard</a>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 16px;">
+
+      <span class="badge" style="background: var(--blue-lt); color: var(--blue); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600;">Hyperledger Fabric</span>
+      <span class="badge" style="background: var(--green-lt); color: var(--green); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;"><span class="dot" style="background: #4ade80;"></span> Live Network</span>
+      <!-- Notification Bell -->
+      <div style="position:relative">
+        <button id="notif-btn" onclick="toggleNotifPanel()"
+          style="background:var(--bg); border:1px solid var(--border); border-radius:50%; cursor:pointer; font-size:18px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">🔔<span
+            id="notif-count"
+            style="display:none;position:absolute;top:-2px;right:-2px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:999px">0</span></button>
+        <div id="notif-panel">
+          <div
+            style="padding:16px 20px;font-weight:700;border-bottom:1px solid #e2e8f0;font-size:14px;display:flex;justify-content:space-between; color: var(--text);">
+            🔔 Notifications <button onclick="markNotifsRead()"
+              style="font-size:12px;background:none;border:none;color:#3b82f6;cursor:pointer; font-weight: 600;">Mark all read</button>
+          </div>
+          <div id="notif-list">
+            <div style="padding:20px;color:#64748b;font-size:14px;text-align:center">No notifications yet.</div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 1px; height: 24px; background: var(--border); margin: 0 4px;"></div>
+      <span id="user-pill" class="badge"
+        style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; background: var(--blue); color: #fff; padding: 8px 16px; border-radius: 999px; font-weight: 600;"></span>
+      <button class="btn" onclick="doLogout()" style="padding:8px 16px;font-size:13px; background: transparent; border: 1px solid var(--border); color: var(--muted); box-shadow: none; border-radius: 999px;">Logout</button>
     </div>
   </header>
 
   <!-- ===== NAVIGATION ===== -->
-  <nav>
-    <button class="tab active" onclick="switchTab('trace', this)">🔍 Trace Product</button>
-    <button class="tab" onclick="switchTab('verify', this)">✅ Verify Authenticity</button>
-    <button class="tab" onclick="switchTab('register', this)">📦 Register Product</button>
-    <button class="tab" onclick="switchTab('transfer', this)">🚚 Record Transfer</button>
+  <nav style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 14px 40px; display: flex; gap: 8px; overflow-x: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+    <button class="tab active" onclick="switchTab('welcome', this)">My Dashboard</button>
+    <button class="tab" id="nav-trace" onclick="switchTab('trace', this)">Trace Product</button>
+    <button class="tab" onclick="switchTab('verify', this)">Verify Authenticity</button>
+    <button class="tab" id="nav-register" onclick="switchTab('register', this)">Register Product</button>
+    <button class="tab" onclick="switchTab('transfer', this)">Record Transfer</button>
+    <button class="tab" onclick="switchTab('search', this)">Search</button>
+    <button class="tab" onclick="switchTab('reports', this)">Reports</button>
+    <button class="tab" onclick="switchTab('iot', this)">IoT Sensors</button>
+    <button id="tab-admin" class="tab" onclick="switchTab('admin', this)" style="display:none">Admin Panel</button>
   </nav>
 
   <!-- ===== MAIN ===== -->
-  <main>
+  <main style="max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px;">
+
+    <!-- WELCOME TAB -->
+    <div class="section active" id="sec-welcome">
+      <div style="background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%); border-radius: 24px; padding: 56px 48px; display: flex; align-items: center; justify-content: space-between; gap: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 24px;">
+        <div style="flex: 1.2;">
+          <h1 style="font-size: 46px; font-weight: 800; color: #0f172a; margin-bottom: 20px; letter-spacing: -0.02em; line-height: 1.1;">Welcome back,<br><span id="welcome-name" style="color: #2563eb;">User</span> 🌿</h1>
+          <p style="font-size: 17px; color: #475569; line-height: 1.6; margin-bottom: 36px; max-width: 500px;">Experience real-time transparency and absolute cryptographic certainty. Discover immutable supply chain provenance directly on our hyper-secure blockchain.</p>
+          <div style="display: flex; gap: 16px;">
+            <button class="btn btn-primary" style="padding: 16px 32px; font-size: 15.5px;" onclick="document.getElementById('nav-trace').click()">🔍 Trace Product</button>
+            <button class="btn" id="welcome-register-btn" style="background: #fff; color: #0f172a; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 16px 32px; font-size: 15.5px;" onclick="document.getElementById('nav-register').click()">📦 Register New</button>
+          </div>
+        </div>
+        <div style="flex: 1; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(37,99,235,0.15);">
+           <div style="background: linear-gradient(145deg, #3b82f6 0%, #1e40af 100%); width: 100%; aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff;">
+              <div style="font-size: 72px; margin-bottom: 24px; background: rgba(255,255,255,0.15); width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">🔗</div>
+              <div style="font-size: 22px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">Blockchain Live</div>
+           </div>
+        </div>
+      </div>
+    </div>
 
     <!-- TRACE TAB -->
-    <div class="section active" id="sec-trace">
+    <div class="section" id="sec-trace">
       <div class="section-header">
         <div class="section-title">Trace Product Journey</div>
         <div class="section-desc">Enter a Batch ID to view the complete immutable history recorded on the blockchain.
@@ -720,6 +1362,10 @@
           </div>
           <div id="t-status-pill"></div>
         </div>
+        <div id="t-alert-reason"
+          style="display:none; background: var(--red-lt); color: var(--red); padding: 12px 24px; font-size: 13.5px; font-weight: 600; border-bottom: 1px solid #fecaca;">
+          ⚠️ <span id="t-alert-text"></span>
+        </div>
         <div class="meta-grid">
           <div class="meta-cell"><label>Manufacturer</label>
             <p id="t-mfr">—</p>
@@ -733,10 +1379,20 @@
           <div class="meta-cell"><label>Transactions</label>
             <p id="t-txcount">—</p>
           </div>
+          <div class="meta-cell"><label>Temp Limits</label>
+            <p id="t-templim">—</p>
+          </div>
+          <div class="meta-cell"><label>Hum Limits</label>
+            <p id="t-humlim">—</p>
+          </div>
         </div>
         <div class="timeline-wrap">
           <div class="tl-title">Transfer History</div>
           <div class="timeline" id="t-timeline"></div>
+        </div>
+        <div class="timeline-wrap" id="iot-history-wrap" style="display:none; border-top: 1px solid var(--border);">
+          <div class="tl-title">📡 Sensor Readings (IoT)</div>
+          <div class="timeline" id="t-iot-timeline"></div>
         </div>
       </div>
 
@@ -760,8 +1416,30 @@
             <input id="verify_id" placeholder="e.g. BATCH001" onkeydown="if(event.key==='Enter') doVerify()" />
           </div>
         </div>
-        <div class="btn-group">
+        <div class="btn-group" style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn btn-primary" id="btn-verify" onclick="doVerify()">✅ Verify Now</button>
+          <button class="btn" id="btn-scan-qr" onclick="toggleQrScanner()"
+            style="background:var(--green);color:#fff;box-shadow:0 1px 2px rgba(22,163,74,.3)">
+            📷 Use Camera
+          </button>
+          <label class="btn" style="background:#e2e8f0;color:#0f172a;cursor:pointer;border:none;">
+             📁 Upload Image
+             <input type="file" accept="image/*" style="display:none;" onchange="handleInternalQrImage(this.files[0])" id="internal-qr-file-input">
+          </label>
+        </div>
+
+        <!-- QR Scanner -->
+        <div id="qr-scanner-wrap" style="display:none;margin-top:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-size:13px;font-weight:600;color:var(--text)">📷 Point camera at QR code</span>
+            <button onclick="stopQrScanner()"
+              style="background:var(--red-lt);color:var(--red);border:1px solid #fecaca;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">✕
+              Close</button>
+          </div>
+          <div id="qr-reader" style="width:100%;border-radius:10px;overflow:hidden;border:2px solid var(--border)">
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center">Verification happens
+            automatically upon QR scan</p>
         </div>
       </div>
       <div class="verify-card" id="verify-output">
@@ -795,6 +1473,22 @@
             <label for="r_date">Production Date *</label>
             <input id="r_date" type="date" />
           </div>
+          <div class="field">
+            <label for="r_min_temp">Min Temp (°C)</label>
+            <input id="r_min_temp" type="number" placeholder="e.g. 2" />
+          </div>
+          <div class="field">
+            <label for="r_max_temp">Max Temp (°C)</label>
+            <input id="r_max_temp" type="number" placeholder="e.g. 8" />
+          </div>
+          <div class="field">
+            <label for="r_min_hum">Min Humidity (%)</label>
+            <input id="r_min_hum" type="number" placeholder="e.g. 30" />
+          </div>
+          <div class="field">
+            <label for="r_max_hum">Max Humidity (%)</label>
+            <input id="r_max_hum" type="number" placeholder="e.g. 60" />
+          </div>
         </div>
         <div class="btn-group">
           <button class="btn btn-primary" id="btn-register" onclick="doRegister()">📦 Register Product</button>
@@ -803,6 +1497,9 @@
       <div class="result-wrap" id="register-output">
         <div class="result-bar" id="register-bar"></div>
         <pre id="register-pre"></pre>
+      </div>
+      <div id="qr-wrap"
+        style="display:none;margin-top:16px;text-align:center;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)">
       </div>
     </div>
 
@@ -832,6 +1529,17 @@
             <input id="t_temp" placeholder="e.g. 4, 25, -18" />
           </div>
         </div>
+
+        <div id="delivered-section"
+          style="display:none;margin-top:18px;padding:14px 16px;background:var(--green-lt);border:1.5px solid var(--green-md);border-radius:10px">
+          <label
+            style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--green)">
+            <input type="checkbox" id="mark-delivered" onchange="onDeliveredToggle(this)"
+              style="width:18px;height:18px;cursor:pointer;accent-color:var(--green)">
+            Mark as Delivered
+          </label>
+        </div>
+
         <div class="btn-group">
           <button class="btn btn-primary" id="btn-transfer" onclick="doTransfer()">🚚 Record Transfer</button>
         </div>
@@ -842,187 +1550,136 @@
       </div>
     </div>
 
+  <!-- SEARCH -->
+  <div class="section" id="sec-search">
+    <div class="section-header">
+      <div class="section-title">Search Products</div>
+      <div class="section-desc">Search the blockchain ledger by Batch ID, product name, manufacturer, or status.</div>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field"><label>Keyword</label><input id="search_q" placeholder="e.g. Milk, Almarai, Delivered"
+            onkeydown="if(event.key==='Enter')doSearch()"></div>
+      </div>
+      <div class="btn-group"><button class="btn btn-primary" id="btn-search" onclick="doSearch()">🔎 Search</button>
+      </div>
+    </div>
+    <div id="search-results" style="margin-top:20px"></div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="section" id="sec-reports">
+    <div class="section-header">
+      <div class="section-title">Generate Report</div>
+      <div class="section-desc">Generate immutable audit and compliance reports from blockchain data.</div>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field"><label>Start Date</label><input id="rep_start" type="date"></div>
+        <div class="field"><label>End Date</label><input id="rep_end" type="date"></div>
+      </div>
+      <div class="btn-group"><button class="btn btn-primary" id="btn-report" onclick="loadReports()">📊 Generate
+          Report</button></div>
+    </div>
+    <div id="report-content" style="margin-top:20px"></div>
+  </div>
+
+  <!-- IOT -->
+  <div class="section" id="sec-iot">
+    <div class="section-header">
+      <div class="section-title">IoT Device Integration</div>
+      <div class="section-desc">Submit sensor readings (GPS, temperature, humidity) directly to the blockchain ledger.
+      </div>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field"><label>Batch ID *</label><input id="iot_batch" placeholder="e.g. BATCH001"></div>
+        <div class="field"><label>Device ID *</label><input id="iot_device" placeholder="e.g. SENSOR-TEMP-01"></div>
+        <div class="field"><label>Sensor Type</label><select id="iot_type" onchange="updateUnit(this.value)">
+            <option value="temperature">Temperature</option>
+            <option value="humidity">Humidity</option>
+          </select></div>
+        <div class="field"><label>Value *</label><input id="iot_value" type="number" step="0.1" placeholder="e.g. 25.4">
+        </div>
+        <div class="field"><label>Unit *</label><input id="iot_unit" value="°C"></div>
+      </div>
+      <div class="btn-group"><button class="btn btn-primary" id="btn-iot" onclick="doIoT()">📡 Submit Reading</button>
+      </div>
+    </div>
+    <div class="result-wrap" id="iot-output">
+      <div class="result-bar" id="iot-bar"></div>
+      <pre id="iot-pre"></pre>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="section" id="sec-admin">
+    <div class="section-header">
+      <div class="section-title">User Management</div>
+      <div class="section-desc">Manage users, roles, and permissions across the blockchain network.</div>
+    </div>
+    <div style="margin-bottom:16px"><button class="btn btn-primary" id="btn-refresh-admin" onclick="loadAdmin()">🔄
+        Refresh Users</button></div>
+    <div class="card" style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>USER ID</th>
+            <th>NAME</th>
+            <th>EMAIL</th>
+            <th>ROLE</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody">
+          <tr>
+            <td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">Click Refresh to load users</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   </main>
+  </div>
 
-  <script>
-    const API = "http://localhost:3001";
+  <div id="public-qr-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+     <div style="background:#fff; border-radius:16px; padding:32px; max-width:400px; width:90%; text-align:center; position:relative;">
+        <button onclick="closePublicQr()" style="position:absolute; top:16px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--muted);">&times;</button>
+        <h2 style="margin-bottom:16px; font-size:20px;">Verify Product</h2>
+        
+        <div style="margin-bottom:16px;">
+          <input type="text" id="public-qr-manual-id" placeholder="Enter Batch ID manually" onkeydown="if(event.key==='Enter')verifyManualId()" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px; font-family:inherit;">
+          <button class="lp-btn lp-btn-primary" style="width:100%;" onclick="verifyManualId()">🔍 Verify ID</button>
+        </div>
 
-    /* ---- Tab switching ---- */
-    function switchTab(name, el) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('sec-' + name).classList.add('active');
-    }
+        <div style="display:flex; align-items:center; margin:16px 0;">
+          <div style="flex:1; height:1px; background:var(--border);"></div>
+          <span style="padding:0 10px; font-size:13px; color:var(--muted); font-weight:600;">OR SCAN QR</span>
+          <div style="flex:1; height:1px; background:var(--border);"></div>
+        </div>
 
-    /* ---- Loading ---- */
-    function setLoading(id, on) {
-      const b = document.getElementById(id);
-      if (on) { b._txt = b.innerHTML; b.innerHTML = '<div class="spinner"></div> Loading...'; b.disabled = true; }
-      else { b.innerHTML = b._txt; b.disabled = false; }
-    }
+        <div style="margin-bottom:16px;">
+          <label style="display:inline-block; background:var(--blue-lt); color:var(--blue); padding:8px 16px; border-radius:8px; font-size:13.5px; font-weight:600; cursor:pointer; width:100%; border:1px solid var(--blue); border-style:dashed;">
+            <input type="file" id="qr-file-input" accept="image/*" style="display:none" onchange="handleQrImage(this.files[0])">
+            📂 Upload QR Image
+          </label>
+        </div>
 
-    /* ---- Generic result box ---- */
-    function showBox(wrapId, barId, preId, data, ok) {
-      const wrap = document.getElementById(wrapId);
-      const bar = document.getElementById(barId);
-      const pre = document.getElementById(preId);
-      wrap.className = 'result-wrap show';
-      bar.className = 'result-bar ' + (ok ? 'success' : 'error');
-      bar.textContent = ok ? '✅ Success' : '❌ Error';
-      pre.textContent = JSON.stringify(data, null, 2);
-    }
+        <div id="public-qr-reader" style="width:100%; border-radius:12px; overflow:hidden; border:2px solid var(--border); margin-bottom:16px; display:none;"></div>
+        <button id="btn-toggle-camera" class="lp-btn lp-btn-outline" style="width:100%; margin-bottom:16px;" onclick="togglePublicCamera()">📷 Use Camera</button>
+        
+        <div id="public-qr-result" style="display:none; padding:16px; border-radius:12px; margin-top:16px;">
+           <div id="pqr-icon" style="font-size:36px; margin-bottom:8px;"></div>
+           <div id="pqr-title" style="font-size:18px; font-weight:700; margin-bottom:4px;"></div>
+           <div id="pqr-id" style="font-family:monospace; font-size:12px; color:var(--muted); margin-bottom:8px;"></div>
+           <div id="pqr-msg" style="font-size:14px;"></div>
+           <button class="lp-btn lp-btn-outline" style="margin-top:12px; padding:8px 16px; font-size:13px;" onclick="resetPublicQr()">Scan Another</button>
+        </div>
+     </div>
+  </div>
 
-    /* ---- TRACE ---- */
-    async function doTrace() {
-      const id = document.getElementById('trace_id').value.trim();
-      if (!id) return alert('Please enter a Batch ID.');
-      setLoading('btn-trace', true);
-
-      // hide previous outputs
-      document.getElementById('trace-output').className = 'product-info';
-      document.getElementById('trace-error').className = 'result-wrap';
-
-      try {
-        const r = await fetch(`${API}/api/trace/${encodeURIComponent(id)}`);
-        const d = await r.json();
-
-        if (d.error) {
-          document.getElementById('trace-error').className = 'result-wrap show';
-          document.getElementById('trace-error-bar').textContent = '❌ ' + d.error;
-          document.getElementById('trace-error-pre').textContent = JSON.stringify(d, null, 2);
-        } else {
-          renderProduct(d);
-        }
-      } catch (e) {
-        document.getElementById('trace-error').className = 'result-wrap show';
-        document.getElementById('trace-error-bar').textContent = '❌ Cannot connect to API';
-        document.getElementById('trace-error-pre').textContent = e.message;
-      }
-      setLoading('btn-trace', false);
-    }
-
-    function renderProduct(d) {
-      document.getElementById('t-name').textContent = d.productName;
-      document.getElementById('t-id').textContent = 'Batch ID: ' + d.batchID;
-      document.getElementById('t-mfr').textContent = d.manufacturer;
-      document.getElementById('t-date').textContent = d.productionDate;
-      document.getElementById('t-owner').textContent = d.currentOwner;
-      document.getElementById('t-txcount').textContent = (d.transactions?.length || 0) + ' events';
-
-      const statusMap = {
-        'Registered': ['status-registered', 'Registered'],
-        'In Transit': ['status-transit', 'In Transit'],
-        'Delivered': ['status-delivered', 'Delivered'],
-      };
-      const [cls, label] = statusMap[d.status] || ['status-registered', d.status];
-      document.getElementById('t-status-pill').innerHTML =
-        `<span class="status-pill ${cls}"><span class="dot"></span> ${label}</span>`;
-
-      // Timeline
-      const tl = document.getElementById('t-timeline');
-      if (!d.transactions || d.transactions.length === 0) {
-        tl.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No transfers recorded yet.</p></div>';
-      } else {
-        tl.innerHTML = d.transactions.map((tx, i) => {
-          const dt = new Date(tx.timestamp);
-          const str = dt.toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-          return `
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-card">
-            <div class="tl-header">
-              <span class="tl-route"><strong>${tx.from}</strong> → <strong>${tx.to}</strong></span>
-              <span class="tl-time">🕐 ${str}</span>
-            </div>
-            <div class="tl-chips">
-              <span class="chip">📍 ${tx.location}</span>
-              <span class="chip">🌡️ ${tx.temperature}°C</span>
-            </div>
-          </div>
-        </div>`;
-        }).join('');
-      }
-
-      document.getElementById('trace-output').className = 'product-info show';
-    }
-
-    /* ---- VERIFY ---- */
-    async function doVerify() {
-      const id = document.getElementById('verify_id').value.trim();
-      if (!id) return alert('Please enter a Batch ID.');
-      setLoading('btn-verify', true);
-
-      const card = document.getElementById('verify-output');
-      card.className = 'verify-card';
-
-      try {
-        const r = await fetch(`${API}/api/verify/${encodeURIComponent(id)}`);
-        const d = await r.json();
-        const ok = d.message && d.message.includes('AUTHENTIC');
-        card.className = 'verify-card show ' + (ok ? 'authentic' : 'notfound');
-        document.getElementById('v-icon').textContent = ok ? '🛡️' : '⚠️';
-        document.getElementById('v-title').textContent = ok ? 'Authentic Product' : 'Product Not Found';
-        document.getElementById('v-title').style.color = ok ? 'var(--green)' : 'var(--red)';
-        document.getElementById('v-sub').textContent = d.message || 'Unknown result.';
-      } catch (e) {
-        card.className = 'verify-card show notfound';
-        document.getElementById('v-icon').textContent = '❌';
-        document.getElementById('v-title').textContent = 'Connection Error';
-        document.getElementById('v-title').style.color = 'var(--red)';
-        document.getElementById('v-sub').textContent = e.message;
-      }
-      setLoading('btn-verify', false);
-    }
-
-    /* ---- REGISTER ---- */
-    async function doRegister() {
-      const body = {
-        batchID: document.getElementById('r_batch').value.trim(),
-        productName: document.getElementById('r_name').value.trim(),
-        manufacturer: document.getElementById('r_manu').value.trim(),
-        productionDate: document.getElementById('r_date').value.trim(),
-      };
-      if (!body.batchID || !body.productName || !body.manufacturer || !body.productionDate)
-        return alert('Please fill in all required fields.');
-
-      setLoading('btn-register', true);
-      try {
-        const r = await fetch(`${API}/api/register`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-        });
-        const d = await r.json();
-        showBox('register-output', 'register-bar', 'register-pre', d, !d.error);
-      } catch (e) {
-        showBox('register-output', 'register-bar', 'register-pre', { error: e.message }, false);
-      }
-      setLoading('btn-register', false);
-    }
-
-    /* ---- TRANSFER ---- */
-    async function doTransfer() {
-      const body = {
-        batchID: document.getElementById('t_batch').value.trim(),
-        newOwner: document.getElementById('t_owner').value.trim(),
-        location: document.getElementById('t_loc').value.trim(),
-        temperature: document.getElementById('t_temp').value.trim(),
-      };
-      if (!body.batchID || !body.newOwner || !body.location)
-        return alert('Please fill in all required fields.');
-
-      setLoading('btn-transfer', true);
-      try {
-        const r = await fetch(`${API}/api/tx`, {   /* ✅ correct endpoint */
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-        });
-        const d = await r.json();
-        showBox('transfer-output', 'transfer-bar', 'transfer-pre', d, !d.error);
-      } catch (e) {
-        showBox('transfer-output', 'transfer-bar', 'transfer-pre', { error: e.message }, false);
-      }
-      setLoading('btn-transfer', false);
-    }
-  </script>
+  <script src="script.js?v=4"></script>
 </body>
-
 </html>
