@@ -1232,11 +1232,14 @@
           <div class="field"><label>User ID *</label><input id="ru_id" placeholder="john01"></div>
           <div class="field"><label>Full Name *</label><input id="ru_name" placeholder="John Smith"></div>
           <div class="field"><label>Email *</label><input id="ru_email" placeholder="john@co.com"></div>
-          <div class="field"><label>Role *</label><select id="ru_role">
+          <div class="field"><label>Role *</label><select id="ru_role" onchange="loadCompaniesDropdown()">
               <option>Manufacturer</option>
               <option>Logistics</option>
               <option>Retailer</option>
               <option>Consumer</option>
+            </select></div>
+          <div class="field" id="ru_company_field"><label id="ru_company_label">Company *</label><select id="ru_company">
+              <option value="">Select your company</option>
             </select></div>
         </div>
         <div class="field" style="margin-bottom:16px"><label>Password *</label><input id="ru_pass" type="password"
@@ -1370,6 +1373,9 @@
           <div class="meta-cell"><label>Manufacturer</label>
             <p id="t-mfr">—</p>
           </div>
+          <div class="meta-cell"><label>Number of Batches</label>
+            <p id="t-batches">—</p>
+          </div>
           <div class="meta-cell"><label>Production Date</label>
             <p id="t-date">—</p>
           </div>
@@ -1471,7 +1477,7 @@
           </div>
           <div class="field">
             <label for="r_date">Production Date *</label>
-            <input id="r_date" type="date" />
+            <input id="r_date" type="date" max="" />
           </div>
           <div class="field">
             <label for="r_min_temp">Min Temp (°C)</label>
@@ -1483,11 +1489,15 @@
           </div>
           <div class="field">
             <label for="r_min_hum">Min Humidity (%)</label>
-            <input id="r_min_hum" type="number" placeholder="e.g. 30" />
+            <input id="r_min_hum" type="number" placeholder="e.g. 30" min="0" max="100" />
           </div>
           <div class="field">
             <label for="r_max_hum">Max Humidity (%)</label>
-            <input id="r_max_hum" type="number" placeholder="e.g. 60" />
+            <input id="r_max_hum" type="number" placeholder="e.g. 60" min="0" max="100" />
+          </div>
+          <div class="field">
+            <label for="r_batches">Number of Batches *</label>
+            <input id="r_batches" type="number" placeholder="e.g. 50" min="1" value="1" />
           </div>
         </div>
         <div class="btn-group">
@@ -1512,21 +1522,43 @@
       </div>
       <div class="card">
         <div class="grid-2">
-          <div class="field">
+          <div class="field" id="wrap_t_batch">
             <label for="t_batch">Batch ID *</label>
-            <input id="t_batch" placeholder="e.g. BATCH001" />
+            <input id="t_batch" list="batch_list" placeholder="Search or select a product..." autocomplete="off" />
+            <datalist id="batch_list"></datalist>
           </div>
           <div class="field">
+            <label for="t_batches">Number of Batches</label>
+            <input id="t_batches" type="text" readonly style="background:#e2e8f0; color:var(--muted)" placeholder="Auto-filled" />
+          </div>
+          <div class="field" id="wrap_t_owner">
             <label for="t_owner">New Owner *</label>
-            <input id="t_owner" placeholder="e.g. Distributor_Riyadh_01" />
+            <select id="t_owner">
+              <option value="">Select New Owner</option>
+            </select>
           </div>
           <div class="field">
             <label for="t_loc">Location *</label>
-            <input id="t_loc" placeholder="e.g. Riyadh, Jeddah, Dammam" />
+            <select id="t_loc">
+              <option value="">Select Location</option>
+              <option value="Riyadh">Riyadh</option>
+              <option value="Makkah">Makkah</option>
+              <option value="Madinah">Madinah</option>
+              <option value="Eastern Province">Eastern Province</option>
+              <option value="Qassim">Qassim</option>
+              <option value="Hail">Hail</option>
+              <option value="Tabuk">Tabuk</option>
+              <option value="Northern Borders">Northern Borders</option>
+              <option value="Jizan">Jizan</option>
+              <option value="Najran">Najran</option>
+              <option value="Al Baha">Al Baha</option>
+              <option value="Al Jawf">Al Jawf</option>
+              <option value="Aseer">Aseer</option>
+            </select>
           </div>
           <div class="field">
             <label for="t_temp">Temperature (°C)</label>
-            <input id="t_temp" placeholder="e.g. 4, 25, -18" />
+            <input id="t_temp" type="number" placeholder="e.g. 4, 25, -18" />
           </div>
         </div>
 
@@ -1618,6 +1650,20 @@
       <div class="section-title">User Management</div>
       <div class="section-desc">Manage users, roles, and permissions across the blockchain network.</div>
     </div>
+    
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="section-title" style="font-size:16px; margin-bottom: 12px;">Add New Company</div>
+      <div class="grid-2">
+        <div class="field"><label>Company Name</label><input id="new_comp_name" placeholder="e.g. Almarai"></div>
+        <div class="field"><label>Company Role</label><select id="new_comp_role">
+            <option>Manufacturer</option>
+            <option>Logistics</option>
+            <option>Retailer</option>
+          </select></div>
+      </div>
+      <div class="btn-group"><button class="btn btn-primary" onclick="createCompany()">🏢 Create Company</button></div>
+    </div>
+
     <div style="margin-bottom:16px"><button class="btn btn-primary" id="btn-refresh-admin" onclick="loadAdmin()">🔄
         Refresh Users</button></div>
     <div class="card" style="overflow-x:auto">
@@ -1627,6 +1673,7 @@
             <th>USER ID</th>
             <th>NAME</th>
             <th>EMAIL</th>
+            <th>COMPANY</th>
             <th>ROLE</th>
             <th>STATUS</th>
             <th>ACTIONS</th>

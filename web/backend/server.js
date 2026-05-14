@@ -13,6 +13,26 @@ app.use(express.json());
 // ─── Serve Frontend Static Files ──────────────────────────────────
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// ─── Local JSON DB for Companies ─────────────────────────────────
+const fs = require('fs');
+const DATA_DIR = path.join(__dirname, 'data');
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+
+const COMPANIES_FILE = path.join(DATA_DIR, 'companies.json');
+const USER_COMPANIES_FILE = path.join(DATA_DIR, 'user_companies.json');
+
+function readJSON(file, defaultVal = {}) {
+    try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+    catch { return defaultVal; }
+}
+function writeJSON(file, data) {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+// Ensure defaults
+if (!fs.existsSync(COMPANIES_FILE)) writeJSON(COMPANIES_FILE, []);
+if (!fs.existsSync(USER_COMPANIES_FILE)) writeJSON(USER_COMPANIES_FILE, {});
+
 // ─── In-memory sessions: token → { userID, name, role, email } ───
 const sessions = new Map();
 
@@ -68,6 +88,52 @@ async function evaluate(fn, ...args) {
   } finally { gateway.close(); client.close(); }
 }
 
+async function augmentProductWithUserNames(data) {
+  try {
+    const users = await evaluate('GetAllUsers');
+    if (!Array.isArray(users)) return data;
+    const userComps = readJSON(USER_COMPANIES_FILE, {});
+    const userMap = {};
+    users.forEach(u => { 
+        const comp = userComps[u.userID];
+        userMap[u.userID] = comp ? `${comp} (${u.name})` : u.name; 
+    });
+
+    const augment = (p) => {
+      if (!p) return p;
+      if (p.manufacturer && userMap[p.manufacturer]) p.manufacturer = userMap[p.manufacturer];
+      
+      const applyMap = (val) => {
+        if (!val) return val;
+        const suffix = " [Retailer-Delivered]";
+        if (val.endsWith(suffix)) {
+            const baseId = val.replace(suffix, "");
+            return userMap[baseId] ? userMap[baseId] + suffix : val;
+        }
+        return userMap[val] || val;
+      };
+
+      if (p.currentOwner) p.currentOwner = applyMap(p.currentOwner);
+
+      if (p.transactions && Array.isArray(p.transactions)) {
+          p.transactions.forEach(tx => {
+              if (tx.from) tx.from = applyMap(tx.from);
+              if (tx.to) tx.to = applyMap(tx.to);
+          });
+      }
+      return p;
+    };
+
+    if (Array.isArray(data)) {
+        return data.map(augment);
+    } else {
+        return augment(data);
+    }
+  } catch (e) {
+    return data;
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  HEALTH
 // ═══════════════════════════════════════════════════════════════════
@@ -77,11 +143,21 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 //  AUTH
 // ═══════════════════════════════════════════════════════════════════
 app.post('/api/auth/register', async (req, res) => {
-  const { userID, name, email, role, password } = req.body;
+  const { userID, name, email, role, password, company } = req.body;
   if (!userID || !name || !email || !role || !password)
     return res.status(400).json({ error: 'All fields are required.' });
+  if (['Manufacturer', 'Logistics', 'Retailer'].includes(role) && !company) {
+    return res.status(400).json({ error: 'Company selection is required for this role.' });
+  }
   try {
     const result = await submit('CreateUser', userID, name, email, role, password);
+    
+    // Save user company
+    if (company) {
+       const userComps = readJSON(USER_COMPANIES_FILE, {});
+       userComps[userID] = company;
+       writeJSON(USER_COMPANIES_FILE, userComps);
+    }
     
     // Auto-disable non-consumer accounts so Admin must approve them
     if (role !== 'Consumer' && role !== 'Admin' && userID !== 'admin') {
@@ -138,8 +214,11 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: errMsg });
     }
     const token = generateToken();
-    sessions.set(token, { userID: result.userID, name: result.name, role: result.role, email: result.email });
-    res.json({ token, user: { userID: result.userID, name: result.name, role: result.role, email: result.email } });
+    const userComps = readJSON(USER_COMPANIES_FILE, {});
+    const company = userComps[result.userID] || '';
+    const userPayload = { userID: result.userID, name: result.name, role: result.role, email: result.email, company: company };
+    sessions.set(token, userPayload);
+    res.json({ token, user: userPayload });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -150,20 +229,66 @@ app.post('/api/auth/logout', auth, (req, res) => {
   res.json({ ok: true });
 });
 
-app.get('/api/auth/me', auth, (req, res) => res.json(req.user));
+app.get('/api/auth/me', auth, (req, res) => {
+  const user = { ...req.user };
+  const userComps = readJSON(USER_COMPANIES_FILE, {});
+  if (userComps[user.userID]) {
+      user.company = userComps[user.userID];
+  }
+  res.json(user);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+//  COMPANIES MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════
+app.get('/api/companies', async (req, res) => {
+  res.json(readJSON(COMPANIES_FILE, []));
+});
+
+app.post('/api/companies', auth, adminOnly, async (req, res) => {
+  const { name, role } = req.body;
+  if (!name || !role) return res.status(400).json({ error: 'Name and role required.' });
+  const companies = readJSON(COMPANIES_FILE, []);
+  if (companies.find(c => c.name.toLowerCase() === name.toLowerCase())) {
+      return res.status(400).json({ error: 'Company already exists.' });
+  }
+  companies.push({ id: Date.now().toString(), name, role });
+  writeJSON(COMPANIES_FILE, companies);
+  res.json({ success: true, companies });
+});
+
+app.get('/api/users/companies', async (req, res) => {
+  res.json(readJSON(USER_COMPANIES_FILE, {}));
+});
 
 // ═══════════════════════════════════════════════════════════════════
 //  USER MANAGEMENT  (Admin only)
 // ═══════════════════════════════════════════════════════════════════
-app.get('/api/users', auth, adminOnly, async (req, res) => {
+app.get('/api/users', auth, async (req, res) => {
   try { res.json(await evaluate('GetAllUsers')); }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/users/:id/role', auth, adminOnly, async (req, res) => {
+/* 
+app.put('/api/users/:userID/role', auth, adminOnly, async (req, res) => {
   const { role } = req.body;
-  try { res.json(await submit('UpdateUserRole', req.params.id, role)); }
-  catch (e) { res.status(400).json({ error: e.message }); }
+  try { res.json(await submit('UpdateUserRole', req.params.userID, role)); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+*/
+
+app.put('/api/users/:userID/company', auth, adminOnly, async (req, res) => {
+  const { company } = req.body;
+  try {
+      const userComps = readJSON(USER_COMPANIES_FILE, {});
+      if (company) {
+          userComps[req.params.userID] = company;
+      } else {
+          delete userComps[req.params.userID];
+      }
+      writeJSON(USER_COMPANIES_FILE, userComps);
+      res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.put('/api/users/:id/disable', auth, adminOnly, async (req, res) => {
@@ -192,17 +317,25 @@ app.put('/api/profile', auth, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════
 //  PRODUCTS
 // ═══════════════════════════════════════════════════════════════════
-app.post('/api/register', auth, canRegister, async (req, res) => {
-  const { batchID, productName, manufacturer, productionDate, minTemp, maxTemp, minHum, maxHum } = req.body;
-  if (!batchID || !productName || !manufacturer || !productionDate)
-    return res.status(400).json({ error: 'All product fields are required.' });
-  try { res.json(await submit('RegisterProduct', batchID, productName, manufacturer, productionDate, String(minTemp || ''), String(maxTemp || ''), String(minHum || ''), String(maxHum || ''))); }
-  catch (e) { res.status(400).json({ error: e.message }); }
+app.post('/api/products/register', auth, canRegister, async (req, res) => {
+  const { batchID, productName, manufacturer, productionDate, minTemp, maxTemp, minHum, maxHum, numberOfBatches } = req.body;
+  if (!batchID || !productName || !manufacturer)
+    return res.status(400).json({ error: 'batchID, productName, and manufacturer are required.' });
+  try {
+    const result = await submit('RegisterProduct', batchID, productName, manufacturer, productionDate, minTemp || '', maxTemp || '', minHum || '', maxHum || '', numberOfBatches || '1');
+    res.json(result);
+  } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.post('/api/tx', auth, canTransfer, async (req, res) => {
   const { batchID, newOwner, location, temperature, minTemp, maxTemp, minHum, maxHum } = req.body;
-  try { res.json(await submit('RecordTransaction', batchID, newOwner, location, temperature, String(minTemp || ''), String(maxTemp || ''), String(minHum || ''), String(maxHum || ''))); }
+  try {
+    const product = await evaluate('TraceProduct', batchID);
+    if (product && product.status === 'Delivered') {
+        return res.status(400).json({ error: `Product "${batchID}" has already been delivered and cannot be transferred again.` });
+    }
+    res.json(await submit('RecordTransaction', batchID, newOwner, location, temperature, String(minTemp || ''), String(maxTemp || ''), String(minHum || ''), String(maxHum || ''))); 
+  }
   catch (e) {
     console.error('TX ERROR:', e);
     res.status(500).json({ error: e.message, details: e.details });
@@ -210,17 +343,33 @@ app.post('/api/tx', auth, canTransfer, async (req, res) => {
 });
 
 app.get('/api/trace/:batchID', async (req, res) => {
-  try { res.json(await evaluate('TraceProduct', req.params.batchID)); }
+  try { 
+      let data = await evaluate('TraceProduct', req.params.batchID);
+      data = await augmentProductWithUserNames(data);
+      res.json(data); 
+  }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/verify/:batchID', async (req, res) => {
-  try { res.json(await evaluate('VerifyProduct', req.params.batchID)); }
+  try { 
+      let data = await evaluate('VerifyProduct', req.params.batchID);
+      if (data && data.manufacturer && data.currentOwner) {
+          const aug = await augmentProductWithUserNames({ manufacturer: data.manufacturer, currentOwner: data.currentOwner });
+          data.manufacturer = aug.manufacturer;
+          data.currentOwner = aug.currentOwner;
+      }
+      res.json(data); 
+  }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/products', auth, async (req, res) => {
-  try { res.json(await evaluate('GetAllProducts')); }
+  try { 
+      let data = await evaluate('GetAllProducts');
+      data = await augmentProductWithUserNames(data);
+      res.json(data); 
+  }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -228,7 +377,11 @@ app.get('/api/products', auth, async (req, res) => {
 app.get('/api/search', async (req, res) => {
   const { q } = req.query;
   if (!q) return res.status(400).json({ error: 'Query parameter "q" is required.' });
-  try { res.json(await evaluate('SearchProducts', q)); }
+  try { 
+      let data = await evaluate('SearchProducts', q);
+      data = await augmentProductWithUserNames(data);
+      res.json(data); 
+  }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -239,6 +392,14 @@ app.post('/api/iot', auth, canIoT, async (req, res) => {
   const { batchID, deviceID, sensorType, value, unit } = req.body;
   if (!batchID || !deviceID || !sensorType || value === undefined || !unit)
     return res.status(400).json({ error: 'All IoT fields are required.' });
+
+  const numValue = parseFloat(value);
+  if (sensorType === 'humidity') {
+    if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+      return res.status(400).json({ error: 'Humidity must be a percentage between 0 and 100.' });
+    }
+  }
+
   try { res.json(await submit('RecordIoTReading', batchID, deviceID, sensorType, String(value), unit)); }
   catch (e) { res.status(400).json({ error: e.message }); }
 });

@@ -6,7 +6,7 @@ const getUser = () => JSON.parse(localStorage.getItem('cp_user') || 'null');
 
 // ── Role Permissions ──────────────────────────────────────────────
 const ROLE_TABS = {
-    'Admin': ['trace', 'verify', 'register', 'transfer', 'search', 'reports', 'iot', 'admin'],
+    'Admin': ['trace', 'verify', 'search', 'reports', 'iot', 'admin'],
     'Manufacturer': ['trace', 'verify', 'register', 'transfer', 'search', 'reports', 'iot'],
     'Logistics': ['trace', 'verify', 'transfer', 'search', 'reports', 'iot'],
     'Retailer': ['trace', 'verify', 'transfer', 'search', 'reports', 'iot'],
@@ -47,11 +47,29 @@ function applyRolePermissions(role) {
     }
 
     const ds = document.getElementById('delivered-section');
-    if (ds) {
-        if (role === 'Logistics' || role === 'Retailer') {
-            ds.style.display = 'block';
-        } else {
-            ds.style.display = 'none';
+    if (ds) ds.style.display = 'none'; // Hide checkbox completely
+
+    // Dynamic Text for Retailer
+    const transferTab = document.querySelector('[onclick*="\'transfer\'"]');
+    const transferTitle = document.querySelector('#sec-transfer .section-title');
+    const transferDesc = document.querySelector('#sec-transfer .section-desc');
+    const transferBtn = document.getElementById('btn-transfer');
+
+    if (role === 'Retailer') {
+        if (transferTab) transferTab.textContent = 'Confirm Delivery';
+        if (transferTitle) transferTitle.textContent = 'Confirm Delivery to Consumer';
+        if (transferDesc) transferDesc.textContent = 'Mark the product as delivered to finalize its journey on the blockchain.';
+        if (transferBtn) {
+            transferBtn.textContent = '✅ Confirm Delivery';
+            transferBtn.style.background = 'var(--green)';
+        }
+    } else {
+        if (transferTab) transferTab.textContent = 'Record Transfer';
+        if (transferTitle) transferTitle.textContent = 'Record Ownership Transfer';
+        if (transferDesc) transferDesc.textContent = 'Log a transfer event between supply chain parties. All data is permanently recorded on the ledger.';
+        if (transferBtn) {
+            transferBtn.innerHTML = '🚚 Record Transfer';
+            transferBtn.style.background = '';
         }
     }
 
@@ -155,6 +173,15 @@ function checkAuth() {
         if (document.getElementById('welcome-name')) {
             document.getElementById('welcome-name').textContent = u.name;
         }
+        
+        // Manufacturer auto-fill
+        const r_manu = document.getElementById('r_manu');
+        if (r_manu) {
+            r_manu.value = u.company || u.name;
+            r_manu.readOnly = true;
+            r_manu.style.background = '#e2e8f0'; // make it look disabled
+        }
+        
         applyRolePermissions(u.role);
     }
     return true;
@@ -180,6 +207,34 @@ function showAuthTab(tab) {
     document.querySelectorAll('.auth-tab-btn').forEach(b =>
         b.classList.toggle('active', b.textContent.toLowerCase().includes(tab === 'login' ? 'sign' : 'create'))
     );
+    if (tab === 'register') {
+        loadCompaniesDropdown();
+    }
+}
+
+async function loadCompaniesDropdown() {
+    try {
+        const r = await fetch(API + '/api/companies');
+        const comps = await r.json();
+        const sel = document.getElementById('ru_company');
+        const roleSel = document.getElementById('ru_role');
+        const compField = document.getElementById('ru_company_field');
+        const currentRole = roleSel ? roleSel.value : '';
+        
+        if (compField) {
+            if (currentRole === 'Consumer' || currentRole === 'Admin') {
+                compField.style.display = 'none';
+            } else {
+                compField.style.display = 'block';
+            }
+        }
+
+        if (sel) {
+            const filtered = comps.filter(c => !currentRole || c.role === currentRole);
+            sel.innerHTML = '<option value="">Select your company</option>' + 
+                            filtered.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        }
+    } catch(e){}
 }
 
 async function doLogin() {
@@ -208,11 +263,15 @@ async function doRegisterUser() {
         name: document.getElementById('ru_name').value.trim(),
         email: document.getElementById('ru_email').value.trim(),
         role: document.getElementById('ru_role').value,
+        company: (document.getElementById('ru_company') ? document.getElementById('ru_company').value : ''),
         password: document.getElementById('ru_pass').value
     };
     document.getElementById('ru_err').textContent = '';
     if (!body.userID || !body.name || !body.email || !body.password) {
         document.getElementById('ru_err').textContent = 'All fields are required.'; return;
+    }
+    if (body.role !== 'Admin' && body.role !== 'Consumer' && !body.company) {
+        document.getElementById('ru_err').textContent = 'Please select a company.'; return;
     }
     if (body.name.length < 2) {
         document.getElementById('ru_err').textContent = 'Name must be at least 2 characters long.'; return;
@@ -253,6 +312,87 @@ function switchTab(name, el) {
     if(sec) sec.classList.add('active');
     if (name === 'admin') loadAdmin();
     if (name === 'reports') loadReports();
+    if (name === 'transfer') loadTransferUsers();
+}
+
+async function loadTransferUsers() {
+    if (!checkAuth()) return;
+    const u = getUser();
+    if (!u) return;
+    
+    let targetRole = [];
+    if (u.role === 'Manufacturer') targetRole = ['Logistics'];
+    else if (u.role === 'Logistics') targetRole = ['Logistics', 'Retailer'];
+    else if (u.role === 'Admin') targetRole = ['All']; // Admin can transfer to anyone
+    
+    const ownerSelect = document.getElementById('t_owner');
+    const wrapOwner = document.getElementById('wrap_t_owner');
+    const batchList = document.getElementById('batch_list');
+    
+    if (u.role === 'Retailer') {
+        if (wrapOwner) wrapOwner.style.display = 'none'; // Hide New Owner completely
+        ownerSelect.innerHTML = '<option value="Consumer">End Customer / Final Store</option>';
+    } else {
+        if (wrapOwner) wrapOwner.style.display = 'flex';
+        try {
+            const r = await fetch(API + '/api/companies');
+            const companies = await r.json();
+            
+            ownerSelect.innerHTML = '<option value="">Select Target Company</option>';
+            
+            companies.forEach(comp => {
+                // Filter companies based on allowed target roles
+                if (targetRole.includes('All') || targetRole.includes(comp.role)) {
+                    // Prevent transferring to own company
+                    if (comp.name !== u.company) {
+                        const opt = document.createElement('option');
+                        opt.value = comp.name;
+                        opt.textContent = comp.name + ' (' + comp.role + ')';
+                        ownerSelect.appendChild(opt);
+                    }
+                }
+            });
+        } catch(e) {
+            console.error('Failed to load companies for transfer', e);
+        }
+    }
+
+    // Populate the Batch Datalist with products they own
+    try {
+        const pr = await fetchAuth(API + '/api/products');
+        const prods = await pr.json();
+        if (batchList) {
+            batchList.innerHTML = ''; // clear old options
+            prods.forEach(p => {
+                // Determine if user owns the product (by individual ID or Company Name)
+                const isOwner = p.currentOwner === u.company || p.currentOwner === u.userID || p.currentOwner === u.name;
+                const isManu = (u.role === 'Manufacturer' && p.status === 'Registered' && (p.manufacturer === u.company || p.manufacturer === u.userID || p.manufacturer === u.name));
+                
+                if (u.role === 'Admin' || isOwner || isManu) {
+                    if (p.status !== 'Delivered') {
+                        const opt = document.createElement('option');
+                        opt.value = p.batchID;
+                        opt.textContent = p.productName;
+                        batchList.appendChild(opt);
+                    }
+                }
+            });
+            
+            // Add listener to auto-fill number of batches
+            const batchInput = document.getElementById('t_batch');
+            const batchesInput = document.getElementById('t_batches');
+            batchInput.addEventListener('input', () => {
+                const selected = prods.find(p => p.batchID === batchInput.value);
+                if (selected && selected.numberOfBatches) {
+                    batchesInput.value = selected.numberOfBatches;
+                } else {
+                    batchesInput.value = '';
+                }
+            });
+        }
+    } catch(e) {
+        console.error('Failed to load products', e);
+    }
 }
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
@@ -296,6 +436,7 @@ function renderProduct(d) {
     document.getElementById('t-name').textContent = d.productName;
     document.getElementById('t-id').textContent = 'Batch ID: ' + d.batchID;
     document.getElementById('t-mfr').textContent = d.manufacturer;
+    document.getElementById('t-batches').textContent = d.numberOfBatches ? d.numberOfBatches : '1';
     document.getElementById('t-date').textContent = d.productionDate;
     document.getElementById('t-owner').textContent = d.currentOwner;
     document.getElementById('t-txcount').textContent = (d.transactions?.length || 0) + ' events';
@@ -626,13 +767,36 @@ async function doRegister() {
         minTemp: document.getElementById('r_min_temp').value,
         maxTemp: document.getElementById('r_max_temp').value,
         minHum: document.getElementById('r_min_hum').value,
-        maxHum: document.getElementById('r_max_hum').value
+        maxHum: document.getElementById('r_max_hum').value,
+        numberOfBatches: document.getElementById('r_batches').value.trim()
     };
     if (!body.batchID || !body.productName || !body.manufacturer || !body.productionDate)
         return alert('Please fill in all required fields.');
+
+    if (body.minTemp && body.maxTemp && parseFloat(body.minTemp) > parseFloat(body.maxTemp)) {
+        return alert('Minimum temperature cannot be higher than maximum temperature.');
+    }
+    if (body.minHum && (parseFloat(body.minHum) < 0 || parseFloat(body.minHum) > 100)) {
+        return alert('Humidity must be between 0 and 100.');
+    }
+    if (body.maxHum && (parseFloat(body.maxHum) < 0 || parseFloat(body.maxHum) > 100)) {
+        return alert('Humidity must be between 0 and 100.');
+    }
+    if (body.minHum && body.maxHum && parseFloat(body.minHum) > parseFloat(body.maxHum)) {
+        return alert('Minimum humidity cannot be higher than maximum humidity.');
+    }
+    if (body.productionDate) {
+        const selectedDate = new Date(body.productionDate);
+        selectedDate.setHours(0,0,0,0);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        if (selectedDate > today) {
+            return alert('Production date cannot be in the future.');
+        }
+    }
     setLoading('btn-register', true);
     try {
-        const r = await fetchAuth(API + '/api/register', { method: 'POST', body: JSON.stringify(body) });
+        const r = await fetchAuth(API + '/api/products/register', { method: 'POST', body: JSON.stringify(body) });
         const d = await r.json();
         showBox('register-output', 'register-bar', 'register-pre', d, !d.error);
         if (!d.error && d.batchID) generateQR(d.batchID);
@@ -661,14 +825,12 @@ function generateQR(batchID) {
 
 /* ── Transfer ─────────────────────────────────────────────────────── */
 function onDeliveredToggle(cb) {
-    const ownerField = document.getElementById('t_owner');
     const btn = document.getElementById('btn-transfer');
+    if (!btn) return;
     if (cb.checked) {
-        ownerField.placeholder = 'e.g. End Customer / Final Store *';
         btn.textContent = '✅ Confirm Delivery';
         btn.style.background = 'var(--green)';
     } else {
-        ownerField.placeholder = 'e.g. Distributor_Riyadh_01';
         btn.innerHTML = '🚚 Record Transfer';
         btn.style.background = '';
     }
@@ -676,11 +838,18 @@ function onDeliveredToggle(cb) {
 
 async function doTransfer() {
     if (!checkAuth()) return;
-    const isDelivered = document.getElementById('mark-delivered')?.checked;
-    let newOwner = document.getElementById('t_owner').value.trim();
+    const u = getUser();
 
-    // إذا "Delivered" مُفعّل، أضف كلمة retailer ليُفعّل شرط الـ Chaincode
-    if (isDelivered && !newOwner.toLowerCase().includes('retailer') && !newOwner.toLowerCase().includes('delivered')) {
+    // Batch ID from the datalist input
+    const batchID = document.getElementById('t_batch').value.trim();
+
+    let newOwner = document.getElementById('t_owner').value.trim();
+    if (u && u.role === 'Retailer') {
+        newOwner = 'Consumer'; // Force Consumer for Retailer
+    }
+
+    // إذا الرتيلر يقوم بالعملية، أضف كلمة retailer ليُفعّل شرط الـ Chaincode
+    if (u && u.role === 'Retailer' && !newOwner.toLowerCase().includes('retailer') && !newOwner.toLowerCase().includes('delivered')) {
         newOwner = newOwner + ' [Retailer-Delivered]';
     }
 
@@ -692,11 +861,43 @@ async function doTransfer() {
     };
     if (!body.batchID || !body.newOwner || !body.location)
         return alert('Please fill in all required fields.');
+
     setLoading('btn-transfer', true);
+    
     try {
+        // Verify ownership before allowing transfer
+        const productRes = await fetch(API + '/api/trace/' + encodeURIComponent(body.batchID));
+        const productData = await productRes.json();
+        
+        if (productData.error) {
+            setLoading('btn-transfer', false);
+            return alert('Product not found.');
+        }
+
+        const isOwner = productData.currentOwner === u.company || productData.currentOwner === u.userID || productData.currentOwner === u.name;
+        const isManu = (u.role === 'Manufacturer' && productData.status === 'Registered' && (productData.manufacturer === u.company || productData.manufacturer === u.userID || productData.manufacturer === u.name));
+        
+        if (u.role !== 'Admin' && !isOwner && !isManu) {
+            setLoading('btn-transfer', false);
+            return alert('Unauthorized: You cannot transfer this product because it is currently owned by ' + productData.currentOwner + '. As a member of ' + (u.company || 'no company') + ', you can only manage products owned by your company.');
+        }
+
+        if (u.role === 'Retailer' && productData.transactions && productData.transactions.length > 0) {
+            const lastTx = productData.transactions[productData.transactions.length - 1];
+            if (lastTx.location !== body.location) {
+                setLoading('btn-transfer', false);
+                return alert('Error: The confirm delivery location (' + body.location + ') must match the location where you received the product (' + lastTx.location + ').');
+            }
+        }
+
         const r = await fetchAuth(API + '/api/tx', { method: 'POST', body: JSON.stringify(body) });
         const d = await r.json();
-        if (!d.error && isDelivered) {
+        const isRetailerDelivery = (u && u.role === 'Retailer');
+        
+        if (d.error && d.error.includes('already been delivered')) {
+            // Hide the error box as requested
+            document.getElementById('transfer-output').className = 'result-wrap';
+        } else if (!d.error && isRetailerDelivery) {
             d._deliveryConfirmed = true;
             showBox('transfer-output', 'transfer-bar', 'transfer-pre',
                 { ...d, status: '✅ Delivered Successfully' }, true);
@@ -762,6 +963,19 @@ async function doIoT() {
     };
     if (!body.batchID || !body.deviceID || !body.value || !body.unit)
         return alert('Please fill all fields.');
+
+    const val = parseFloat(body.value);
+    if (body.sensorType === 'humidity') {
+        if (isNaN(val) || val < 0 || val > 100) {
+            return alert('Humidity value must be a percentage between 0 and 100.');
+        }
+    } else if (val < -100 || val > 100) { // General safety check for temperature as well
+        if (isNaN(val)) return alert('Please enter a valid numeric value.');
+    }
+    
+    if (val < 0 && body.sensorType === 'humidity') {
+        return alert('Humidity cannot be negative.');
+    }
     setLoading('btn-iot', true);
     try {
         const r = await fetchAuth(API + '/api/iot', { method: 'POST', body: JSON.stringify(body) });
@@ -813,18 +1027,32 @@ async function loadAdmin() {
     if (!checkAuth() || getUser()?.role !== 'Admin') return;
     setLoading('btn-refresh-admin', true);
     try {
-        const r = await fetchAuth(API + '/api/users');
+        const [r, cRes, ucRes] = await Promise.all([
+            fetchAuth(API + '/api/users'),
+            fetch(API + '/api/companies'),
+            fetchAuth(API + '/api/users/companies')
+        ]);
         const users = await r.json();
+        const comps = await cRes.json();
+        const userComps = await ucRes.json();
+        
         if (users.error) { alert(users.error); return; }
         const roles = ['Admin', 'Manufacturer', 'Logistics', 'Retailer', 'Consumer'];
-        document.getElementById('admin-tbody').innerHTML = users.map(u =>
-            '<tr>'
+        
+        document.getElementById('admin-tbody').innerHTML = users.map(u => {
+            const uComp = userComps[u.userID] || '';
+            const compOptions = '<option value="">-- None --</option>' + comps.map(c => 
+                `<option value="${c.name}" ${c.name === uComp ? 'selected' : ''}>${c.name}</option>`
+            ).join('');
+            
+            return '<tr>'
             + '<td style="font-family:monospace;font-size:12.5px">' + u.userID + '</td>'
             + '<td>' + u.name + '</td>'
             + '<td style="font-size:12.5px">' + u.email + '</td>'
-            + '<td><select onchange="changeRole(\'' + u.userID + '\',this.value)" style="border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:12px;font-family:inherit">'
-            + roles.map(ro => '<option' + (ro === u.role ? ' selected' : '') + '>' + ro + '</option>').join('')
+            + '<td><select onchange="changeCompany(\'' + u.userID + '\',this.value)" style="border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:12px;font-family:inherit">'
+            + compOptions
             + '</select></td>'
+            + '<td><span class="badge" style="background:var(--bg);color:var(--text);border:1px solid var(--border)">' + u.role + '</span></td>'
             + '<td><span class="badge ' + (u.status === 'Active' ? 'badge-green' : 'badge-yellow') + '">' 
             + (u.status === 'Active' ? 'Active' : (u.role === 'Consumer' ? 'Disabled' : 'Pending Approval')) + '</span></td>'
             + '<td>' + (u.role !== 'Admin'
@@ -833,13 +1061,14 @@ async function loadAdmin() {
                 + (u.status === 'Active' ? 'Disable' : 'Enable') + '</button>'
                 : '—') + '</td>'
             + '</tr>'
-        ).join('');
+        }).join('');
     } catch (e) { alert(e.message); }
     setLoading('btn-refresh-admin', false);
 }
 
-async function changeRole(id, role) {
-    try { await fetchAuth(API + '/api/users/' + id + '/role', { method: 'PUT', body: JSON.stringify({ role }) }); loadAdmin(); }
+
+async function changeCompany(id, company) {
+    try { await fetchAuth(API + '/api/users/' + id + '/company', { method: 'PUT', body: JSON.stringify({ company }) }); loadAdmin(); }
     catch (e) { alert(e.message); }
 }
 async function disableUser(id) {
@@ -850,6 +1079,17 @@ async function disableUser(id) {
 async function enableUser(id) {
     try { await fetchAuth(API + '/api/users/' + id + '/enable', { method: 'PUT' }); loadAdmin(); }
     catch (e) { alert(e.message); }
+}
+
+async function createCompany() {
+    const name = document.getElementById('new_comp_name').value.trim();
+    const role = document.getElementById('new_comp_role').value;
+    if(!name) return alert('Enter company name');
+    try {
+        await fetchAuth(API + '/api/companies', { method: 'POST', body: JSON.stringify({ name, role }) });
+        alert('Company created successfully!');
+        document.getElementById('new_comp_name').value = '';
+    } catch(e) { alert(e.message); }
 }
 
 /* ── Notifications ────────────────────────────────────────────────── */
@@ -888,13 +1128,14 @@ async function markNotifsRead() {
 }
 
 window.addEventListener('click', e => {
-    const p = document.getElementById('notif-panel');
     const btn = document.getElementById('notif-btn');
     if (p && btn && !btn.contains(e.target) && !p.contains(e.target)) p.style.display = 'none';
 });
 
 /* ── Init ─────────────────────────────────────────────────────────── */
 checkAuth();
+const todayISO = new Date().toISOString().split("T")[0];
+if(document.getElementById('r_date')) document.getElementById('r_date').max = todayISO;
 setInterval(pollNotifications, 30000);
 
 window.subscribeNewsletter = function() {

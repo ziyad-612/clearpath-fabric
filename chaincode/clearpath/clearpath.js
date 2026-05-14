@@ -160,7 +160,7 @@ class ClearPathContract extends Contract {
     // ═══════════════════════════════════════════
     //  PRODUCT MANAGEMENT
     // ═══════════════════════════════════════════
-    async RegisterProduct(ctx, batchID, productName, manufacturer, productionDate, minTemp, maxTemp, minHum, maxHum) {
+    async RegisterProduct(ctx, batchID, productName, manufacturer, productionDate, minTemp, maxTemp, minHum, maxHum, numberOfBatches) {
         if (await this._exists(ctx, 'PROD_' + batchID))
             throw new Error(`Product "${batchID}" already exists`);
 
@@ -176,7 +176,8 @@ class ClearPathContract extends Contract {
                 maxTemp: maxTemp ? parseFloat(maxTemp) : 30,
                 minHum: minHum ? parseFloat(minHum) : null,
                 maxHum: maxHum ? parseFloat(maxHum) : 85
-            }
+            },
+            numberOfBatches: numberOfBatches ? parseInt(numberOfBatches) : 1
         };
         await ctx.stub.putState('PROD_' + batchID, Buffer.from(JSON.stringify(product)));
         await this._saveNotifs(ctx, batchID, [{
@@ -187,12 +188,14 @@ class ClearPathContract extends Contract {
     }
 
     async RecordTransaction(ctx, batchID, newOwner, location, temperature, minTemp, maxTemp, minHum, maxHum) {
-        // Support old key format (no prefix) for backward compatibility
         let raw = await ctx.stub.getState('PROD_' + batchID);
         if (!raw || raw.length === 0) raw = await ctx.stub.getState(batchID);
         if (!raw || raw.length === 0) throw new Error(`Product "${batchID}" does not exist`);
 
         const product = JSON.parse(raw.toString());
+        if (product.status === 'Delivered') {
+            throw new Error(`Product "${batchID}" has already been delivered and cannot be transferred again.`);
+        }
         const txTime = this._getTxTime(ctx);
         const transaction = {
             txID: ctx.stub.getTxID(),
